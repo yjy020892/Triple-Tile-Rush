@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  APPLICATION_ID 금지: Google Mobile Ads Unity 에셋(OnPreprocess 가 GoogleMobileAdsPlugin.androidlib 에 삽입)과 중복하면 Gradle Colliding Attributes 발생.
+  값은 Assets > GoogleMobileAdsSettings (또는 Resources/GoogleMobileAdsSettings.asset) 의 Android App Id — SortingAdMobIds.AndroidAppId 과 맞출 것.
+
+  배포 전 교체:
+    - AD_ID 권한 : Android 13+ 에서 AdMob 광고 ID 사용 시 필수
+    - INTERNET / ACCESS_NETWORK_STATE : 광고/IAP/Firebase 전부 필요
+
+  tools:replace 는 Unity 기본 매니페스트와 병합 시 충돌을 해결하기 위한 병합 규칙.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" package="com.gameislife.triplematchking" xmlns:unity="http://schemas.unity3d.com/unity/2020/manifest">
+  <!-- 네트워크/광고 ID 권한 -->
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+  <!-- Play Billing (Unity IAP) -->
+  <uses-permission android:name="com.android.vending.BILLING" />
+  <application android:allowBackup="false" tools:replace="android:allowBackup">
+    <!-- APPLICATION_ID는 GMA 플러그인 ManifestProcessor가 삽입 -->
+    <meta-data android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT" android:value="true" />
+  </application>
+</manifest>

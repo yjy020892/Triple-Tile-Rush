@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "132946506425",
+    "firebase_url": "https://triplematchking-default-rtdb.firebaseio.com",
+    "project_id": "triplematchking",
+    "storage_bucket": "triplematchking.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132946506425:android:77208e212192c767e6e168",
+        "android_client_info": {
+          "package_name": "com.gameislife.triplematchking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlctjK5iBiS9LP60uiRPMcGFlOTyne7nA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

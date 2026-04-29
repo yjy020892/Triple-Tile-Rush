@@ -1,0 +1,21 @@
+AdMob 콘솔에서 발급 후 붙일 위치 (Android)
+
+1) App ID (물결 ~ 포함, ca-app-pub-xxxxx~yyyy 형식)
+   - Assets/Plugins/Android/AndroidManifest.xml
+     <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="여기" />
+   - (참고) Assets/Scripts/Runtime/SortingAdMobIds.cs 의 AndroidAppId 는 코드에서 읽지 않을 수 있음.
+     매니페스트 값이 런타임에 사용됨. 둘을 항상 동일하게 유지 권장.
+
+2) Rewarded 광고 단위 ID (ca-app-pub-xxxxx/zzzzz)
+   - Assets/Scripts/Runtime/SortingAdMobIds.cs → UNITY_ANDROID 블록 RewardedUnitId
+
+3) Interstitial 광고 단위 ID
+   - SortingAdMobIds.cs → UNITY_ANDROID 블록 InterstitialUnitId
+
+4) 테스트 기기 등록(선택, 권장)
+   - SortingAdMobAdService.cs 생성자에서 MobileAds.Initialize 직전에
+     RequestConfiguration.TestDeviceIds 설정
+   - Logcat 에서 “Use AdRequest.Builder.addTestDevice(...)” 문구 확인
+
+전면·리워드만 사용. 배너/앱오픈 없음.
