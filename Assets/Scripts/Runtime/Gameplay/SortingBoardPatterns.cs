@@ -1,0 +1,1007 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public enum SortingBoardPattern
+{
+    Grid       = 0,
+    Diamond    = 1,
+    Pyramid    = 2,
+    Plus       = 3,
+    Heart      = 4,
+    Hourglass  = 5,
+    Bowtie     = 6,
+    Circle     = 7,
+    TwoRows    = 8,
+    TwoColumns = 9,
+    FourCorners= 10,
+    ArrowUp    = 11,
+    Ring       = 12,
+    TShape     = 13,
+    LShape     = 14,
+    DiagCross  = 15,
+    Star       = 16,
+    Umbrella   = 17,
+    ArrowDown  = 18,
+    Crown      = 19,
+    Flower     = 20,
+    Butterfly  = 21,
+    ZigZag     = 22,
+    LetterH    = 23,
+    LetterS    = 24,
+    LetterZ    = 25,
+    LetterU    = 26,
+    Snowflake  = 27,
+    FourLeaf   = 28,
+    Checkerboard = 29,
+    ThreeStripes = 30,
+    Pentagon   = 31,
+    Cross      = 32,
+    Wave       = 33,
+    SShape     = 34,
+    Shield     = 35,
+    Sun        = 36,
+    Mushroom   = 37,
+    Castle     = 38,
+    Droplet    = 39,
+    Hexagon    = 40,  // 11-wide
+    Mountain   = 41,  // 11-wide
+    ChristmasTree = 42,
+    Frame      = 43,
+    EightStar  = 44,
+    Spade      = 45,
+    ArrowRight = 46,
+    Stairs     = 47,
+    Arch       = 48,  // 11-wide
+    Vase       = 49,
+    BigCircle  = 50,  // 11-wide, 83 tiles
+    BigDiamond = 51,  // 11-wide, 70 tiles
+    SmallBlock15 = 52,
+    SmallDiamond21 = 53,
+    SmallPyramid21 = 54,
+    SmallTwoColumns24 = 55,
+    SmallArrow15 = 56,
+    SmallRing24 = 57,
+    LayerLine3 = 58,
+    LayerBlock6 = 59,
+    LayerBlock9 = 60,
+    LayerLine12 = 61,
+    LayerColumn15 = 62,
+    LayerCorners12 = 63,
+    LayerCrown15 = 64,
+    LayerDiamond15 = 65,
+    LayerCap18 = 66,
+    LayerMiniDiamond9 = 67,
+    LayerPillar12 = 68,
+    LayerCross15 = 69,
+    LayerDiagonal6 = 70,
+    LayerStagger9 = 71,
+    LayerOffset12 = 72,
+}
+
+public static class SortingBoardPatterns
+{
+    private static readonly Dictionary<SortingBoardPattern, string[]> PatternGrids
+        = new Dictionary<SortingBoardPattern, string[]>
+    {
+        [SortingBoardPattern.Diamond] = new[]
+        {
+            "...XXX...",
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Circle] = new[]
+        {
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+        },
+        [SortingBoardPattern.Plus] = new[]
+        {
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Heart] = new[]
+        {
+            ".XXX.XXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Hourglass] = new[]
+        {
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.Bowtie] = new[]
+        {
+            "XXXX.XXXX",
+            ".XXX.XXX.",
+            "..XX.XX..",
+            "...X.X...",
+            "....X....",
+            "...X.X...",
+            "..XX.XX..",
+            ".XXX.XXX.",
+            "XXXX.XXXX",
+        },
+        [SortingBoardPattern.Pyramid] = new[]
+        {
+            "...XXX...",
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.TwoRows] = new[]
+        {
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".........",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.TwoColumns] = new[]
+        {
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+        },
+        [SortingBoardPattern.FourCorners] = new[]
+        {
+            "XXXX.XXXX",
+            "XXXX.XXXX",
+            "XXXX.XXXX",
+            ".........",
+            "XXXX.XXXX",
+            "XXXX.XXXX",
+            "XXXX.XXXX",
+        },
+        [SortingBoardPattern.ArrowUp] = new[]
+        {
+            "...XXX...",
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Ring] = new[]
+        {
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XX.....XX",
+            "XX.....XX",
+            "XX.....XX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.TShape] = new[]
+        {
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.LShape] = new[]
+        {
+            "XXX......",
+            "XXX......",
+            "XXX......",
+            "XXX......",
+            "XXX......",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.DiagCross] = new[]
+        {
+            "X.......X",
+            ".XX...XX.",
+            "..XXXXX..",
+            "...XXX...",
+            "..XXXXX..",
+            ".XX...XX.",
+            "X.......X",
+        },
+        [SortingBoardPattern.Star] = new[]
+        {
+            ".....X.....",
+            "....XXX....",
+            "X..XXXXX..X",
+            ".XXXXXXXXX.",
+            "..XXXXXXX..",
+            "...XXXXX...",
+            "..XXXXXXX..",
+            ".XXX...XXX.",
+            "XXX.....XXX",
+        },
+        [SortingBoardPattern.Umbrella] = new[]
+        {
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "....X....",
+            "....X....",
+            "....X....",
+        },
+        [SortingBoardPattern.ArrowDown] = new[]
+        {
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Crown] = new[]
+        {
+            "XX.XXX.XX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+        },
+        [SortingBoardPattern.Flower] = new[]
+        {
+            "..X.X.X..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "X.XXXXX.X",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..X.X.X..",
+        },
+        [SortingBoardPattern.Butterfly] = new[]
+        {
+            "XXXX.XXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXX.XXXX",
+        },
+        [SortingBoardPattern.ZigZag] = new[]
+        {
+            "XXX......",
+            "XXXXX....",
+            "XXXXXXX..",
+            ".XXXXXXX.",
+            "..XXXXXXX",
+            "....XXXXX",
+            "......XXX",
+        },
+        [SortingBoardPattern.LetterH] = new[]
+        {
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+        },
+        [SortingBoardPattern.LetterS] = new[]
+        {
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXX......",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "......XXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+        },
+        [SortingBoardPattern.LetterZ] = new[]
+        {
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".......XX",
+            "......XX.",
+            ".....XX..",
+            "....XX...",
+            "...XX....",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.LetterU] = new[]
+        {
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.Snowflake] = new[]
+        {
+            "X...X...X",
+            ".X..X..X.",
+            "..XXXXX..",
+            "...XXX...",
+            "XXXXXXXXX",
+            "...XXX...",
+            "..XXXXX..",
+            ".X..X..X.",
+            "X...X...X",
+        },
+        [SortingBoardPattern.FourLeaf] = new[]
+        {
+            ".XXX.XXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXX.XXX.",
+        },
+        [SortingBoardPattern.Checkerboard] = new[]
+        {
+            "X.X.X.X.X",
+            ".X.X.X.X.",
+            "X.X.X.X.X",
+            ".X.X.X.X.",
+            "X.X.X.X.X",
+            ".X.X.X.X.",
+            "X.X.X.X.X",
+        },
+        [SortingBoardPattern.ThreeStripes] = new[]
+        {
+            "XX.XXX.XX",  // 3 symmetric vertical stripes (2+3+2 wide)
+            "XX.XXX.XX",
+            "XX.XXX.XX",
+            "XX.XXX.XX",
+            "XX.XXX.XX",
+            "XX.XXX.XX",
+            "XX.XXX.XX",
+        },
+        [SortingBoardPattern.Pentagon] = new[]
+        {
+            "....X....",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.Cross] = new[]
+        {
+            "XX.....XX",
+            "XXX...XXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXX...XXX",
+            "XX.....XX",
+        },
+        [SortingBoardPattern.Wave] = new[]
+        {
+            "XXX......",
+            "XXXXX....",
+            ".XXXXXXX.",
+            "....XXXXX",
+            "......XXX",
+            "....XXXXX",
+            ".XXXXXXX.",
+            "XXXXX....",
+            "XXX......",
+        },
+        [SortingBoardPattern.SShape] = new[]
+        {
+            "..XXXXXXX",
+            ".XXXXXXX.",
+            "XXXXXXX..",
+            ".XXXXXXX.",
+            "..XXXXXXX",
+        },
+
+
+        [SortingBoardPattern.Shield] = new[]
+        {
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "..XXXXX..",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Sun] = new[]
+        {
+            "..XX.XX..",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "..XX.XX..",
+        },
+        [SortingBoardPattern.Mushroom] = new[]
+        {
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "...XXX...",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Castle] = new[]
+        {
+            "XX.XXX.XX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            ".XXXXXXX.",
+        },
+        [SortingBoardPattern.Droplet] = new[]
+        {
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Hexagon] = new[]
+        {
+            "...XXXXX...",
+            "..XXXXXXX..",
+            ".XXXXXXXXX.",
+            "XXXXXXXXXXX",
+            ".XXXXXXXXX.",
+            "..XXXXXXX..",
+            "...XXXXX...",
+        },
+        [SortingBoardPattern.Mountain] = new[]
+        {
+            "....XXX....",
+            "...XXXXX...",
+            "..XXXXXXX..",
+            ".XXXXXXXXX.",
+            "XXXXXXXXXXX",
+            "XXXXXXXXXXX",
+        },
+        [SortingBoardPattern.ChristmasTree] = new[]
+        {
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.Frame] = new[]
+        {
+            "XXXXXXXXX",
+            "XX.....XX",
+            "XX.....XX",
+            "XX.....XX",
+            "XX.....XX",
+            "XX.....XX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.EightStar] = new[]
+        {
+            "..XX.XX..",
+            "...XXX...",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "...XXX...",
+            "..XX.XX..",
+        },
+        [SortingBoardPattern.Spade] = new[]
+        {
+            ".XXX.XXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "..XXXXX..",
+            "...XXX...",
+            "..XXXXX..",
+        },
+        [SortingBoardPattern.ArrowRight] = new[]
+        {
+            "XXX......",
+            "XXXXX....",
+            "XXXXXXX..",
+            "XXXXXXXXX",
+            "XXXXXXX..",
+            "XXXXX....",
+            "XXX......",
+        },
+        [SortingBoardPattern.Stairs] = new[]
+        {
+            "......XXX",
+            "......XXX",
+            "...XXXXXX",
+            "...XXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.Arch] = new[]
+        {
+            "...XXXXX...",
+            ".XXXXXXXXX.",
+            "XX.......XX",
+            "XX.......XX",
+            "XXXXXXXXXXX",
+            "XXXXXXXXXXX",
+        },
+        [SortingBoardPattern.Vase] = new[]
+        {
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "...XXX...",
+            "...XXX...",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.BigCircle] = new[]
+        {
+            "...XXXXX...",
+            ".XXXXXXXXX.",
+            "XXXXXXXXXXX",
+            "XXXXXXXXXXX",
+            "XXXXXXXXXXX",
+            "XXXXXXXXXXX",
+            "XXXXXXXXXXX",
+            ".XXXXXXXXX.",
+            "...XXXXX...",
+        },
+        [SortingBoardPattern.BigDiamond] = new[]
+        {
+            "....XXX....",
+            "...XXXXX...",
+            "..XXXXXXX..",
+            ".XXXXXXXXX.",
+            "XXXXXXXXXXX",
+            "XXXXXXXXXXX",
+            ".XXXXXXXXX.",
+            "..XXXXXXX..",
+            "...XXXXX...",
+            "....XXX....",
+        },
+        [SortingBoardPattern.SmallBlock15] = new[]
+        {
+            "XXXXX",
+            "XXXXX",
+            "XXXXX",
+        },
+        [SortingBoardPattern.SmallDiamond21] = new[]
+        {
+            "..X..",
+            ".XXX.",
+            "XXXXX",
+            "XXXXX",
+            ".XXX.",
+            ".XXX.",
+            "..X..",
+        },
+        [SortingBoardPattern.SmallPyramid21] = new[]
+        {
+            "...X...",
+            "..XXX..",
+            ".XXXXX.",
+            ".XXXXX.",
+            "XXXXXXX",
+        },
+        [SortingBoardPattern.SmallTwoColumns24] = new[]
+        {
+            "XX.XX",
+            "XX.XX",
+            "XX.XX",
+            "XX.XX",
+            "XX.XX",
+            "XX.XX",
+        },
+        [SortingBoardPattern.SmallArrow15] = new[]
+        {
+            ".XXX.",
+            ".XXX.",
+            "XXXXX",
+            ".XXX.",
+            "..X..",
+        },
+        [SortingBoardPattern.SmallRing24] = new[]
+        {
+            "XXXXXX",
+            "XX..XX",
+            "XX..XX",
+            "XX..XX",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.LayerLine3] = new[]
+        {
+            "XXX",
+        },
+        [SortingBoardPattern.LayerBlock6] = new[]
+        {
+            "XXX",
+            "XXX",
+        },
+        [SortingBoardPattern.LayerBlock9] = new[]
+        {
+            "XXX",
+            "XXX",
+            "XXX",
+        },
+        [SortingBoardPattern.LayerLine12] = new[]
+        {
+            "XXXX",
+            "XXXX",
+            "XXXX",
+        },
+        [SortingBoardPattern.LayerColumn15] = new[]
+        {
+            ".XXX.",
+            ".XXX.",
+            ".XXX.",
+            ".XXX.",
+            ".XXX.",
+        },
+        [SortingBoardPattern.LayerCorners12] = new[]
+        {
+            "XX..XX",
+            "X....X",
+            "......",
+            "X....X",
+            "XX..XX",
+        },
+        [SortingBoardPattern.LayerCrown15] = new[]
+        {
+            "XXXXX",
+            "XXXXX",
+            ".XXX.",
+            ".XX..",
+        },
+        [SortingBoardPattern.LayerDiamond15] = new[]
+        {
+            "..X..",
+            ".XXX.",
+            "XXXXX",
+            ".XXX.",
+            ".XXX.",
+        },
+        [SortingBoardPattern.LayerCap18] = new[]
+        {
+            ".XXXX.",
+            "XXXXXX",
+            ".XXXX.",
+            "..XX..",
+            "..XX..",
+        },
+        [SortingBoardPattern.LayerMiniDiamond9] = new[]
+        {
+            "..X..",
+            ".XXX.",
+            "XXXXX",
+        },
+        [SortingBoardPattern.LayerPillar12] = new[]
+        {
+            ".XX.",
+            ".XX.",
+            "XXXX",
+            ".XX.",
+            ".XX.",
+        },
+        [SortingBoardPattern.LayerCross15] = new[]
+        {
+            "..X..",
+            ".XXX.",
+            "XXXXX",
+            ".XXX.",
+            ".XXX.",
+        },
+        [SortingBoardPattern.LayerDiagonal6] = new[]
+        {
+            "X..",
+            ".X.",
+            "..X",
+            "X..",
+            ".X.",
+            "..X",
+        },
+        [SortingBoardPattern.LayerStagger9] = new[]
+        {
+            "X.X",
+            ".X.",
+            "XXX",
+            ".X.",
+            "X.X",
+        },
+        [SortingBoardPattern.LayerOffset12] = new[]
+        {
+            "XX..",
+            ".XX.",
+            "..XX",
+            ".XX.",
+            "XXXX",
+        },
+    };
+
+    public static List<Vector2> Resolve(
+        SortingBoardPattern pattern,
+        int needed,
+        Rect boardRect,
+        float cellSize,
+        Vector2 originOffset = default,
+        float clipEnvelope = 1.0f)
+    {
+        if (needed <= 0) return new List<Vector2>();
+
+        if (pattern == SortingBoardPattern.Grid || !PatternGrids.TryGetValue(pattern, out string[] grid))
+            return ResolveAutoGrid(needed, boardRect, cellSize, originOffset, clipEnvelope);
+
+        List<Vector2> result = ResolveStringGrid(grid, needed, boardRect, cellSize, originOffset, clipEnvelope);
+
+        if (result.Count < needed)
+        {
+            List<Vector2> extra = ResolveAutoGrid(
+                needed - result.Count, boardRect, cellSize, originOffset, clipEnvelope);
+            result.AddRange(extra);
+        }
+
+        return result;
+    }
+
+    public static int GetDesignedTileCount(SortingBoardPattern pattern)
+    {
+        int cells = GetPatternCellCount(pattern);
+        if (cells == int.MaxValue)
+        {
+            return 0;
+        }
+
+        return cells;
+    }
+
+    public static int GetGridCellCount(string customGrid)
+    {
+        string[] grid = ParseCustomGrid(customGrid);
+        if (grid == null || grid.Length == 0) return 0;
+
+        int count = 0;
+        for (int r = 0; r < grid.Length; r++)
+        {
+            string row = grid[r];
+            for (int c = 0; c < row.Length; c++)
+            {
+                if (row[c] == 'X') count++;
+            }
+        }
+
+        return count;
+    }
+
+    public static Vector2Int GetGridSize(string customGrid)
+    {
+        string[] grid = ParseCustomGrid(customGrid);
+        if (grid == null || grid.Length == 0) return Vector2Int.zero;
+
+        int cols = 0;
+        for (int r = 0; r < grid.Length; r++)
+        {
+            cols = Mathf.Max(cols, grid[r].Length);
+        }
+
+        return new Vector2Int(cols, grid.Length);
+    }
+
+    public static List<Vector2> ResolveCustom(
+        string customGrid,
+        int needed,
+        Rect boardRect,
+        float cellSize,
+        Vector2 originOffset = default,
+        float clipEnvelope = 1.0f)
+    {
+        string[] grid = ParseCustomGrid(customGrid);
+        if (grid == null || grid.Length == 0)
+        {
+            return Resolve(SortingBoardPattern.Grid, needed, boardRect, cellSize, originOffset, clipEnvelope);
+        }
+
+        return ResolveStringGrid(grid, needed, boardRect, cellSize, originOffset, clipEnvelope);
+    }
+
+    public static bool HasMatchableCellCount(SortingBoardPattern pattern)
+    {
+        int cells = GetPatternCellCount(pattern);
+        return cells != int.MaxValue && cells > 0 && cells % 3 == 0;
+    }
+
+    private static string[] ParseCustomGrid(string customGrid)
+    {
+        if (string.IsNullOrWhiteSpace(customGrid)) return null;
+        string[] rows = customGrid.Split('/');
+        List<string> clean = new List<string>(rows.Length);
+        for (int i = 0; i < rows.Length; i++)
+        {
+            string row = rows[i].Trim();
+            if (row.Length > 0) clean.Add(row);
+        }
+        return clean.ToArray();
+    }
+
+    public static int GetPatternCellCount(SortingBoardPattern pattern)
+    {
+        if (pattern == SortingBoardPattern.Grid || !PatternGrids.TryGetValue(pattern, out string[] grid))
+        {
+            return int.MaxValue;
+        }
+
+        int count = 0;
+        for (int r = 0; r < grid.Length; r++)
+        {
+            string row = grid[r];
+            for (int c = 0; c < row.Length; c++)
+            {
+                if (row[c] == 'X') count++;
+            }
+        }
+
+        return count;
+    }
+
+    public static string[] GetPatternRows(SortingBoardPattern pattern)
+    {
+        if (pattern == SortingBoardPattern.Grid || !PatternGrids.TryGetValue(pattern, out string[] grid))
+        {
+            return null;
+        }
+
+        string[] copy = new string[grid.Length];
+        for (int i = 0; i < grid.Length; i++)
+        {
+            copy[i] = grid[i];
+        }
+        return copy;
+    }
+
+    public static Vector2Int GetPatternGridSize(SortingBoardPattern pattern)
+    {
+        if (pattern == SortingBoardPattern.Grid || !PatternGrids.TryGetValue(pattern, out string[] grid))
+        {
+            return Vector2Int.zero;
+        }
+
+        int rows = grid.Length;
+        int cols = 0;
+        for (int r = 0; r < rows; r++)
+        {
+            if (grid[r].Length > cols) cols = grid[r].Length;
+        }
+
+        return new Vector2Int(cols, rows);
+    }
+
+    private static List<Vector2> ResolveAutoGrid(
+        int needed, Rect boardRect, float cellSize,
+        Vector2 originOffset, float clipEnvelope)
+    {
+        float usableW  = boardRect.width  * 0.96f;
+        float usableH  = boardRect.height * 0.96f;
+        int   cols     = Mathf.Max(1, Mathf.FloorToInt(usableW / cellSize));
+        int   rows     = Mathf.Max(1, Mathf.FloorToInt(usableH / cellSize));
+        float startX   = -cols * cellSize * 0.5f + cellSize * 0.5f;
+        float startY   =  rows * cellSize * 0.5f - cellSize * 0.5f;
+        float maxAbsX  = boardRect.width  * 0.5f * clipEnvelope - cellSize * 0.4f;
+        float maxAbsY  = boardRect.height * 0.5f * clipEnvelope - cellSize * 0.4f;
+
+        var candidates = new List<(Vector2 pos, float dist)>(cols * rows);
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                float x = startX + c * cellSize + originOffset.x;
+                float y = startY - r * cellSize + originOffset.y;
+                if (Mathf.Abs(x) > maxAbsX || Mathf.Abs(y) > maxAbsY) continue;
+                candidates.Add((new Vector2(x, y), x * x + y * y));
+            }
+        }
+
+        return Finalize(candidates, needed);
+    }
+
+    private static List<Vector2> ResolveStringGrid(
+        string[] grid, int needed, Rect boardRect, float cellSize,
+        Vector2 originOffset, float clipEnvelope)
+    {
+        int gridRows = grid.Length;
+        int gridCols = 0;
+        for (int r = 0; r < gridRows; r++)
+            if (grid[r].Length > gridCols) gridCols = grid[r].Length;
+
+        float offX    = -(gridCols - 1) * cellSize * 0.5f;
+        float offY    =  (gridRows - 1) * cellSize * 0.5f;
+        float maxAbsX = boardRect.width  * 0.5f * clipEnvelope - cellSize * 0.4f;
+        float maxAbsY = boardRect.height * 0.5f * clipEnvelope - cellSize * 0.4f;
+
+        var patternCells = new List<(Vector2 pos, float dist)>(gridRows * gridCols);
+        for (int r = 0; r < gridRows; r++)
+        {
+            string row = grid[r];
+            for (int c = 0; c < row.Length; c++)
+            {
+                if (row[c] != 'X') continue;
+
+                float rawX = offX + c * cellSize;
+                float rawY = offY - r * cellSize;
+                float x    = rawX + originOffset.x;
+                float y    = rawY + originOffset.y;
+
+                if (Mathf.Abs(x) > maxAbsX || Mathf.Abs(y) > maxAbsY) continue;
+
+                patternCells.Add((new Vector2(x, y), rawX * rawX + rawY * rawY));
+            }
+        }
+
+        return Finalize(patternCells, needed);
+    }
+
+    private static List<Vector2> Finalize(List<(Vector2 pos, float dist)> candidates, int needed)
+    {
+        candidates.Sort((a, b) => a.dist.CompareTo(b.dist));
+        int take   = Mathf.Min(needed, candidates.Count);
+        var result = new List<Vector2>(take);
+        for (int i = 0; i < take; i++) result.Add(candidates[i].pos);
+        return result;
+    }
+
+}
