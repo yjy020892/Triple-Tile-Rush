@@ -195,18 +195,19 @@ public static class SortingBuildMenu
         Directory.CreateDirectory(buildDirectory);
 
         EditorUserBuildSettings.buildAppBundle = true;
+        string outputName = GetAndroidBuildFileName("aab");
         BuildPlayerOptions options = new BuildPlayerOptions
         {
             scenes = new[] { "Assets/Scenes/Main.unity" },
             target = BuildTarget.Android,
-            locationPathName = Path.Combine(buildDirectory, "SortingPuzzleMVP.aab"),
+            locationPathName = Path.Combine(buildDirectory, outputName),
             options = BuildOptions.None
         };
 
         BuildReport report = BuildPipeline.BuildPlayer(options);
         if (report.summary.result == BuildResult.Succeeded)
         {
-            CopyLatestMappingFile(buildDirectory, "SortingPuzzleMVP-mapping.txt");
+            CopyLatestMappingFile(buildDirectory, $"{Path.GetFileNameWithoutExtension(outputName)}-mapping.txt");
         }
         Debug.Log($"Android AAB build result: {report.summary.result}  →  {buildDirectory}");
     }
@@ -219,20 +220,44 @@ public static class SortingBuildMenu
         Directory.CreateDirectory(buildDirectory);
 
         EditorUserBuildSettings.buildAppBundle = false;
+        string outputName = GetAndroidBuildFileName("apk");
         BuildPlayerOptions options = new BuildPlayerOptions
         {
             scenes = new[] { "Assets/Scenes/Main.unity" },
             target = BuildTarget.Android,
-            locationPathName = Path.Combine(buildDirectory, "SortingPuzzleMVP.apk"),
+            locationPathName = Path.Combine(buildDirectory, outputName),
             options = BuildOptions.None
         };
 
         BuildReport report = BuildPipeline.BuildPlayer(options);
         if (report.summary.result == BuildResult.Succeeded)
         {
-            CopyLatestMappingFile(buildDirectory, "SortingPuzzleMVP-mapping.txt");
+            CopyLatestMappingFile(buildDirectory, $"{Path.GetFileNameWithoutExtension(outputName)}-mapping.txt");
         }
         Debug.Log($"Android APK build result: {report.summary.result}  →  {buildDirectory}");
+    }
+
+    private static string GetAndroidBuildFileName(string extension)
+    {
+        string appName = SanitizeFileName(PlayerSettings.productName);
+        string versionName = SanitizeFileName(PlayerSettings.bundleVersion);
+        int versionCode = PlayerSettings.Android.bundleVersionCode;
+        return $"{appName}_{versionName}_{versionCode}.{extension.TrimStart('.')}";
+    }
+
+    private static string SanitizeFileName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "App";
+        }
+
+        foreach (char invalidChar in Path.GetInvalidFileNameChars())
+        {
+            value = value.Replace(invalidChar, '_');
+        }
+
+        return value.Trim();
     }
 
     private static void CopyLatestMappingFile(string buildDirectory, string outputName)

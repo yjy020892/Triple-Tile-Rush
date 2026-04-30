@@ -5,6 +5,7 @@ using System.Linq;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public partial class SortingGameController : MonoBehaviour
@@ -119,7 +120,13 @@ public partial class SortingGameController : MonoBehaviour
         wallet.OnCoinChanged += _ => RefreshTopTexts();
 
         LoadSave();
-        BuildRuntimeUI();
+        bool usingSceneUi = TryUseSceneUi();
+        if (!usingSceneUi)
+        {
+            Debug.LogError("[SortingGameController] Scene UI not found. The baked Canvas under SortingGameController is required.");
+            enabled = false;
+            return;
+        }
 
         analyticsService.LogEvent(SortingAnalyticsEvents.SessionStart, new Dictionary<string, object>
         {
@@ -357,6 +364,234 @@ public partial class SortingGameController : MonoBehaviour
         // 보드/슬롯은 타일이 자주 생성·파괴되므로 별도 서브 캔버스로 격리해서 루트 캔버스 rebuild 비용 절감.
         PromoteToSubCanvas(boardRoot);
         PromoteToSubCanvas(slotRoot);
+    }
+
+    private bool TryUseSceneUi()
+    {
+        Canvas sceneCanvas = FindNamedComponentInChildren<Canvas>(transform, "Canvas");
+        if (sceneCanvas == null)
+        {
+            return false;
+        }
+
+        rootCanvas = sceneCanvas;
+        safeAreaRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SafeArea");
+        boardRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "BoardRoot");
+        bottomRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "BottomRoot");
+        slotRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SlotRoot");
+        if (safeAreaRoot == null || boardRoot == null || bottomRoot == null || slotRoot == null)
+        {
+            return false;
+        }
+
+        stageText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "LevelLabel");
+        stageSubText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "StageSub");
+        coinText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "CoinText");
+        remainText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "RemainText");
+        emptyText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "EmptyText");
+        hintInfoText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "HintText");
+
+        clearPopup = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "ClearPopup");
+        failPopup = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "FailPopup");
+        clearPopupTitleText = clearPopup != null ? FindNamedComponentInChildren<TMP_Text>(clearPopup.transform, "Title") : null;
+        clearPopupBodyText = clearPopup != null ? FindNamedComponentInChildren<TMP_Text>(clearPopup.transform, "Body") : null;
+        nextButton = clearPopup != null ? FindButtonUnder(clearPopup.transform, "PrimaryButton") : null;
+        retryButton = failPopup != null ? FindButtonUnder(failPopup.transform, "PrimaryButton") : null;
+        continueButton = failPopup != null ? FindButtonUnder(failPopup.transform, "SecondaryButton") : null;
+
+        shuffleButton = FindButtonUnder(rootCanvas.transform, "ShuffleButton");
+        undoButton = FindButtonUnder(rootCanvas.transform, "UndoButton");
+        hintButton = FindButtonUnder(rootCanvas.transform, "HintButton");
+        extraSlotButton = FindButtonUnder(rootCanvas.transform, "ExtraSlotButton");
+
+        menuOverlay = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "MenuOverlay");
+        settingsOverlay = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "SettingsOverlay");
+        shopOverlay = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "ShopOverlay");
+        tutorialOverlay = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "TutorialOverlay");
+        tutorialText = tutorialOverlay != null ? FindNamedComponentInChildren<TMP_Text>(tutorialOverlay.transform, "Text") : null;
+        tutorialArrow = tutorialOverlay != null ? FindNamedComponentInChildren<RectTransform>(tutorialOverlay.transform, "Arrow") : null;
+
+        soundMuteBar = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SpkMuteBar");
+        soundWave1 = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SpkWave1");
+        soundWave2 = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SpkWave2");
+
+        ResolveSettingsToggleRefs();
+        BindSceneUiEvents();
+        HidePopup(clearPopup);
+        HidePopup(failPopup);
+        HideOverlayImmediate(menuOverlay);
+        HideOverlayImmediate(settingsOverlay);
+        HideOverlayImmediate(shopOverlay);
+        HideOverlayImmediate(tutorialOverlay);
+        if (tutorialArrow != null) tutorialArrow.gameObject.SetActive(false);
+        RefreshSoundButtonVisual();
+        PromoteToSubCanvas(boardRoot);
+        PromoteToSubCanvas(slotRoot);
+        return true;
+    }
+
+    private void BindSceneUiEvents()
+    {
+        BindButton(FindButtonUnder(rootCanvas.transform, "MenuButton"), OnMenuClicked);
+        BindButton(FindButtonUnder(rootCanvas.transform, "SoundButton"), OnSoundClicked);
+        BindButton(FindButtonUnder(rootCanvas.transform, "CoinChip"), () =>
+        {
+            SortingAudio.Play(SortingAudio.Sfx.Click);
+            ShowOverlay(shopOverlay);
+        });
+
+        BindButton(shuffleButton, OnShuffleClicked);
+        BindButton(undoButton, OnUndoClicked);
+        BindButton(hintButton, OnHintClicked);
+        BindButton(extraSlotButton, OnExtraSlotClicked);
+        BindButton(nextButton, OnNextLevelClicked);
+        BindButton(retryButton, OnRetryClicked);
+        BindButton(continueButton, OnContinueClicked);
+
+        BindButton(menuOverlay != null ? FindButtonUnder(menuOverlay.transform, "CloseButton") : null, () => HideOverlay(menuOverlay));
+        BindButton(menuOverlay != null ? FindButtonUnder(menuOverlay.transform, "Resume") : null, () =>
+        {
+            HideOverlay(menuOverlay);
+            SortingAudio.Play(SortingAudio.Sfx.Click);
+        });
+        BindButton(menuOverlay != null ? FindButtonUnder(menuOverlay.transform, "Shop") : null, () =>
+        {
+            HideOverlay(menuOverlay);
+            ShowOverlay(shopOverlay);
+        });
+        BindButton(menuOverlay != null ? FindButtonUnder(menuOverlay.transform, "Settings") : null, () =>
+        {
+            HideOverlay(menuOverlay);
+            RefreshSettingsPanel();
+            ShowOverlay(settingsOverlay);
+        });
+        BindButton(menuOverlay != null ? FindButtonUnder(menuOverlay.transform, "HowToPlay") : null, () =>
+        {
+            HideOverlay(menuOverlay);
+            currentTutorialKey = null;
+            ShowTutorialText("타일은 누르면 아래 칸으로 옮아요.\n같은 종류를 3개 모으면 매치!\n바가 다 차면 패배이니 칸 여유와 부스터를 활용해요.");
+        });
+        BindButton(menuOverlay != null ? FindButtonUnder(menuOverlay.transform, "Restart") : null, () =>
+        {
+            HideOverlay(menuOverlay);
+            SortingAudio.Play(SortingAudio.Sfx.Click);
+            StartLevel();
+        });
+
+        BindButton(settingsOverlay != null ? FindButtonUnder(settingsOverlay.transform, "CloseButton") : null, () => HideOverlay(settingsOverlay));
+        BindButton(FindSettingsToggleButton("SoundRow"), () =>
+        {
+            SortingSettings.SoundOn = !SortingSettings.SoundOn;
+            RefreshSettingsPanel();
+            RefreshSoundButtonVisual();
+            SortingAudio.Play(SortingAudio.Sfx.Click);
+        });
+        BindButton(FindSettingsToggleButton("MusicRow"), () =>
+        {
+            SortingSettings.MusicOn = !SortingSettings.MusicOn;
+            SortingAudio.PlayBgm(SortingSettings.MusicOn);
+            RefreshSettingsPanel();
+            SortingAudio.Play(SortingAudio.Sfx.Click);
+        });
+        BindButton(FindSettingsToggleButton("VibrationRow"), () =>
+        {
+            SortingSettings.VibrationOn = !SortingSettings.VibrationOn;
+            if (SortingSettings.VibrationOn) SortingAudio.Vibrate(SortingAudio.HapticStyle.Light);
+            RefreshSettingsPanel();
+            SortingAudio.Play(SortingAudio.Sfx.Click);
+        });
+        BindButton(settingsOverlay != null ? FindButtonUnder(settingsOverlay.transform, "RestoreButton") : null, OnRestorePurchasesClicked);
+
+        BindButton(shopOverlay != null ? FindButtonUnder(shopOverlay.transform, "CloseButton") : null, () => HideOverlay(shopOverlay));
+        BindButton(shopOverlay != null ? FindButtonUnder(shopOverlay.transform, "RewardedRow") : null, OnWatchRewardedAdClicked);
+        BindShopProductButtons();
+
+        Button tutorialButton = tutorialOverlay != null ? tutorialOverlay.GetComponent<Button>() : null;
+        BindButton(tutorialButton, DismissTutorial);
+    }
+
+    private void BindShopProductButtons()
+    {
+        string[] skus =
+        {
+            SortingIapCatalog.SkuStarterPack,
+            SortingIapCatalog.SkuRemoveAds,
+            SortingIapCatalog.SkuCoinSmall,
+            SortingIapCatalog.SkuCoinMedium,
+            SortingIapCatalog.SkuCoinLarge,
+            SortingIapCatalog.SkuCoinHuge,
+        };
+
+        for (int i = 0; i < skus.Length; i++)
+        {
+            string sku = skus[i];
+            Transform product = shopOverlay != null ? FindNamedChild(shopOverlay.transform, $"Product_{sku}") : null;
+            Button buyButton = product != null ? FindButtonUnder(product, "BuyButton") : null;
+            TMP_Text priceLabel = product != null ? FindNamedComponentInChildren<TMP_Text>(product, "Price") : null;
+            Image buyImage = buyButton != null ? buyButton.targetGraphic as Image : null;
+            if (commerce != null && commerce.Iap.IsOwned(sku))
+            {
+                if (buyImage != null) buyImage.color = new Color(0.55f, 0.55f, 0.55f, 1f);
+                if (priceLabel != null) priceLabel.text = "OWNED";
+                if (buyButton != null) buyButton.interactable = false;
+            }
+            BindButton(buyButton, () => OnShopBuyClicked(sku, priceLabel));
+        }
+    }
+
+    private Button FindSettingsToggleButton(string rowName)
+    {
+        Transform row = settingsOverlay != null ? FindNamedChild(settingsOverlay.transform, rowName) : null;
+        return row != null ? FindButtonUnder(row, "Toggle") : null;
+    }
+
+    private void ResolveSettingsToggleRefs()
+    {
+        ResolveSettingsToggleRefs("SoundRow", out settingsSoundToggleBg, out settingsSoundToggleLabel);
+        ResolveSettingsToggleRefs("MusicRow", out settingsMusicToggleBg, out settingsMusicToggleLabel);
+        ResolveSettingsToggleRefs("VibrationRow", out settingsVibrationToggleBg, out settingsVibrationToggleLabel);
+    }
+
+    private void ResolveSettingsToggleRefs(string rowName, out Image background, out TMP_Text label)
+    {
+        background = null;
+        label = null;
+        Transform row = settingsOverlay != null ? FindNamedChild(settingsOverlay.transform, rowName) : null;
+        Transform toggle = row != null ? FindNamedChild(row, "Toggle") : null;
+        if (toggle == null) return;
+        background = toggle.GetComponent<Image>();
+        label = FindNamedComponentInChildren<TMP_Text>(toggle, "Value");
+    }
+
+    private static void BindButton(Button button, UnityAction action)
+    {
+        if (button == null || action == null) return;
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(action);
+    }
+
+    private static Button FindButtonUnder(Transform root, string objectName)
+    {
+        Transform target = FindNamedChild(root, objectName);
+        return target != null ? target.GetComponentInChildren<Button>(true) : null;
+    }
+
+    private static T FindNamedComponentInChildren<T>(Transform root, string objectName) where T : Component
+    {
+        Transform child = FindNamedChild(root, objectName);
+        return child != null ? child.GetComponent<T>() : null;
+    }
+
+    private static Transform FindNamedChild(Transform root, string objectName)
+    {
+        if (root == null) return null;
+        if (root.name == objectName) return root;
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform found = FindNamedChild(root.GetChild(i), objectName);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     // 대상 RectTransform 을 서브 캔버스로 만들어 상위 Canvas 의 재배치/재메싱에서 분리.
