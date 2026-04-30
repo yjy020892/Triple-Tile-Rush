@@ -1243,42 +1243,88 @@ public partial class SortingGameController : MonoBehaviour
             return;
         }
 
-        StartCoroutine(SortingTweenUtility.ScalePunch(candidate.transform, 0.24f, 1.16f));
+        StartCoroutine(CoExecuteHint(candidate));
+    }
+
+    private IEnumerator CoExecuteHint(SortingItemView candidate)
+    {
+        isInputLocked = true;
+        candidate.SetBusy(true);
         hintInfoText.text = $"HINT: TRY {candidate.ItemType.ToString().ToUpperInvariant()}";
         analyticsService.LogEvent("booster_hint_used", new Dictionary<string, object>
         {
             { "stage", currentLevel },
             { "type", candidate.ItemType.ToString() }
         });
+        yield return StartCoroutine(SortingTweenUtility.ScalePunch(candidate.transform, 0.24f, 1.16f));
+        candidate.SetBusy(false);
+        isInputLocked = false;
     }
 
     private SortingItemView FindBestHintCandidate()
     {
         List<SortingItemView> exposed = boardItems.Where(x => x != null && x.IsExposed && !x.IsRemoved).ToList();
-        if (exposed.Count == 0)
-        {
-            return null;
-        }
+        if (exposed.Count == 0) return null;
 
-        Dictionary<SortingItemType, int> slotTypeCounts = slotItems
+        // Tray types sorted by count desc (2개 있는 타입이 가장 급함)
+        var slotGroups = slotItems
             .GroupBy(x => x.ItemType)
-            .ToDictionary(g => g.Key, g => g.Count());
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .ToList();
 
-        SortingItemView best = null;
-        int bestScore = int.MinValue;
-        for (int i = 0; i < exposed.Count; i++)
+        if (slotGroups.Count > 0)
         {
-            SortingItemView item = exposed[i];
-            int score = slotTypeCounts.TryGetValue(item.ItemType, out int count) ? count : 0;
-            score += exposed.Count(x => x.ItemType == item.ItemType);
-            if (score > bestScore)
+            // Priority 1: tray 타입 중 바로 클릭 가능한 타일이 있으면 그걸 추천
+            foreach (SortingItemType target in slotGroups)
             {
-                bestScore = score;
-                best = item;
+                SortingItemView direct = exposed.FirstOrDefault(x => x.ItemType == target);
+                if (direct != null) return direct;
+            }
+
+            // Priority 2: 클릭 가능한 동일 타입이 없음 → 묻혀있는 tray 타입 위의 블로커 추천
+            List<SortingItemView> buried = boardItems
+                .Where(x => x != null && !x.IsRemoved && !x.IsExposed).ToList();
+            var slotTypeSet = new HashSet<SortingItemType>(slotGroups);
+
+            foreach (SortingItemType target in slotGroups)
+            {
+                var buriedTargets = buried.Where(x => x.ItemType == target).ToList();
+                if (buriedTargets.Count == 0) continue;
+
+                var blockers = exposed
+                    .Where(exp => buriedTargets.Any(b => HintOverlapsAndAbove(exp, b)))
+                    .ToList();
+
+                if (blockers.Count == 0) continue;
+
+                // 블로커 중 tray에 이미 있는 타입이면 클릭 시 2배 효율 → 우선
+                SortingItemView best = blockers.FirstOrDefault(b => slotTypeSet.Contains(b.ItemType))
+                                    ?? blockers[0];
+                return best;
             }
         }
 
-        return best;
+        // Priority 3: tray 무관 일반 추천 — 같은 타입이 tray+보드에 많을수록 우선
+        var slotTypeDict = slotItems.GroupBy(x => x.ItemType).ToDictionary(g => g.Key, g => g.Count());
+        SortingItemView fallback = null;
+        int bestScore = int.MinValue;
+        foreach (SortingItemView item in exposed)
+        {
+            int score = (slotTypeDict.TryGetValue(item.ItemType, out int c) ? c * 10 : 0)
+                      + exposed.Count(x => x.ItemType == item.ItemType);
+            if (score > bestScore) { bestScore = score; fallback = item; }
+        }
+        return fallback;
+    }
+
+    // RefreshBoardExposure 에서 sibling index = render order 로 세팅되므로 그대로 활용
+    private bool HintOverlapsAndAbove(SortingItemView upper, SortingItemView lower)
+    {
+        if (upper.transform.GetSiblingIndex() <= lower.transform.GetSiblingIndex()) return false;
+        float sz = (upper.RectTransform.rect.width + lower.RectTransform.rect.width) * 0.34f;
+        Vector2 d = upper.RectTransform.anchoredPosition - lower.RectTransform.anchoredPosition;
+        return Mathf.Abs(d.x) <= sz && Mathf.Abs(d.y) <= sz;
     }
 
     private bool TrySpendCoins(int amount)
@@ -1659,6 +1705,7 @@ public partial class SortingGameController : MonoBehaviour
         {
             if (root == null) return;
             root.DOKill();
+            root.localScale = Vector3.one;
             root.DOPunchScale(new Vector3(0.12f, 0.12f, 0f), 0.2f, 5, 0.25f).SetUpdate(true);
         });
         return button;

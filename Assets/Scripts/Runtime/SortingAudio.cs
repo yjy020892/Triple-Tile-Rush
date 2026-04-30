@@ -42,12 +42,35 @@ public static class SortingAudio
     public static void Vibrate(HapticStyle style)
     {
         if (!SortingSettings.VibrationOn) return;
-#if UNITY_IOS || UNITY_ANDROID
-        // iOS/Android 네이티브 햅틱은 플러그인으로 교체 예정.
-        // 지금은 간단히 Handheld.Vibrate 로 얼버무린다 (Android 전용이고 스타일 구분 안 됨).
 #if UNITY_ANDROID && !UNITY_EDITOR
-        try { Handheld.Vibrate(); } catch { /* ignore */ }
-#endif
+        long ms = style switch
+        {
+            HapticStyle.Light   => 18L,
+            HapticStyle.Medium  => 30L,
+            HapticStyle.Heavy   => 45L,
+            HapticStyle.Success => 25L,
+            HapticStyle.Warning => 35L,
+            HapticStyle.Error   => 40L,
+            _                   => 20L,
+        };
+        try
+        {
+            using var player   = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            using var activity = player.GetStatic<AndroidJavaObject>("currentActivity");
+            using var vibrator = activity.Call<AndroidJavaObject>("getSystemService", "vibrator");
+            int sdk = new AndroidJavaClass("android.os.Build$VERSION").GetStatic<int>("SDK_INT");
+            if (sdk >= 26)
+            {
+                using var effectClass = new AndroidJavaClass("android.os.VibrationEffect");
+                using var effect      = effectClass.CallStatic<AndroidJavaObject>("createOneShot", ms, -1);
+                vibrator.Call("vibrate", effect);
+            }
+            else
+            {
+                vibrator.Call("vibrate", ms);
+            }
+        }
+        catch { /* ignore */ }
 #endif
     }
 
