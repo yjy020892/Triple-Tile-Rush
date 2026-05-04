@@ -60,6 +60,7 @@ public partial class SortingGameController : MonoBehaviour
     private int currentLevel;
     private bool isGameEnded;
     private bool isInputLocked;
+    private bool isMatchChecking;
     private int extraSlotCount;
     private float currentTileSize = 140f;
     private SortingLevelDefinition currentDefinition;
@@ -1074,31 +1075,18 @@ public partial class SortingGameController : MonoBehaviour
 
     private IEnumerator CoMoveItemToSlot(SortingItemView itemView)
     {
-        isInputLocked = true;
         itemView.SetBusy(true);
         itemView.SetExposedState(true);
-
         boardItems.Remove(itemView);
-
         InsertIntoSlot(itemView);
-        itemView.transform.SetParent(slotRoot, true);
-        itemView.RectTransform.sizeDelta = GetSlotItemSize();
-
-        yield return StartCoroutine(SortingTweenUtility.ScalePunch(itemView.transform, 0.12f, 0.92f));
-
-        int slotIndex = slotItems.IndexOf(itemView);
-        if (slotIndex >= 0 && slotIndex < slotCells.Count)
-        {
-            RectTransform targetCell = slotCells[slotIndex];
-            yield return StartCoroutine(SortingTweenUtility.MoveTo(itemView.RectTransform, GetSlotCellCenterWorldPosition(targetCell), 0.16f));
-            PlaceItemIntoSlotCell(itemView, targetCell);
-        }
-
-        itemView.SetBusy(false);
         RefreshBoardExposure();
         RefreshSlotPositions();
         RefreshTopTexts();
+        itemView.SetBusy(false);
+        StartCoroutine(SortingTweenUtility.ScalePunch(itemView.transform, 0.12f, 0.92f));
 
+        while (isMatchChecking) yield return null;
+        isMatchChecking = true;
         yield return StartCoroutine(CheckMatches());
         RefreshTopTexts();
 
@@ -1111,7 +1099,7 @@ public partial class SortingGameController : MonoBehaviour
             ClearLevel();
         }
 
-        isInputLocked = false;
+        isMatchChecking = false;
     }
 
     private void InsertIntoSlot(SortingItemView itemView)
