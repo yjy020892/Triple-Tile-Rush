@@ -10,6 +10,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
 {
     private const string CsvAssetPath = "Assets/Resources/Levels/levels.csv";
     private const int MaxGridSize = 13;
+    private const float NestedLayerFillRatio = 0.72f;
 
     private int level = 1;
     private SortingTheme theme = SortingTheme.Food;
@@ -50,6 +51,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
             level = EditorGUILayout.IntField("Level", level);
             if (GUILayout.Button("Load", GUILayout.Width(80))) LoadLevel(level);
             if (GUILayout.Button("Save", GUILayout.Width(80))) SaveLevel();
+            if (GUILayout.Button("Auto Nest", GUILayout.Width(94))) AutoNestLayers();
         }
 
         if (GUILayout.Button("Open Scene Preview", GUILayout.Height(28)))
@@ -70,7 +72,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
             EditorGUILayout.LabelField("Layers", EditorStyles.boldLabel);
             if (GUILayout.Button("+ Layer", GUILayout.Width(90)))
             {
-                layers.Add(new EditableLayer { useCustom = true });
+                layers.Add(new EditableLayer { useCustom = true, offset = new Vector2(0.5f, 0.5f) });
             }
         }
 
@@ -175,6 +177,48 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         EditorGUILayout.HelpBox($"Total tiles: {total}. {(total % 3 == 0 ? "3-match compatible." : "Tile count should be divisible by 3.")}", type);
     }
 
+    private void AutoNestLayers()
+    {
+        if (layers.Count == 0)
+        {
+            layers.Add(new EditableLayer());
+            return;
+        }
+
+        EditableLayer baseLayer = layers[0];
+        int baseCount = CountLayerTiles(baseLayer);
+        if (baseCount <= 0)
+        {
+            return;
+        }
+
+        string sourceGrid = baseLayer.useCustom
+            ? BuildCustomGrid(baseLayer)
+            : SortingBoardPatterns.BuildCustomGrid(baseLayer.pattern);
+
+        int previousCount = baseCount;
+        for (int i = 1; i < layers.Count; i++)
+        {
+            EditableLayer layer = layers[i];
+            int existingCount = CountLayerTiles(layer);
+            int autoCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
+            int targetCount = ResolveNestedTargetCount(existingCount, autoCount);
+            string nestedGrid = SortingBoardPatterns.BuildNestedCustomGrid(sourceGrid, targetCount, i);
+            if (string.IsNullOrWhiteSpace(nestedGrid))
+            {
+                break;
+            }
+
+            layer.useCustom = true;
+            layer.offset = new Vector2(0.5f, 0.5f);
+            LoadCustomGrid(layer, nestedGrid);
+            sourceGrid = nestedGrid;
+            previousCount = SortingBoardPatterns.GetGridCellCount(nestedGrid);
+        }
+
+        RefreshPreviewScene();
+    }
+
     private void DrawPreview()
     {
         EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
@@ -218,15 +262,13 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         var result = new List<PreviewCell>();
         if (layers.Count == 0) return result;
 
-        Vector2Int baseSize = GetLayerSize(layers[0]);
         for (int i = 0; i < layers.Count; i++)
         {
             EditableLayer layer = layers[i];
             List<Vector2> layerCells = GetLayerPreviewCells(layer);
-            Vector2Int layerSize = GetLayerSize(layer);
             Vector2 offset = i == 0
-                ? Vector2.zero
-                : CalculatePreviewDiagonalOffset(baseSize, layerSize);
+                ? layer.offset
+                : CalculatePreviewDiagonalOffset(GetLayerSize(layers[i - 1]), GetLayerSize(layer));
 
             for (int c = 0; c < layerCells.Count; c++)
             {
@@ -309,6 +351,11 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         return cells;
     }
 
+    private string[] GetPatternRows(SortingBoardPattern pattern)
+    {
+        return SortingBoardPatterns.GetPatternRows(pattern);
+    }
+
     private Vector2Int GetLayerSize(EditableLayer layer)
     {
         if (layer.useCustom) return new Vector2Int(layer.cols, layer.rows);
@@ -333,11 +380,6 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         float x = (baseSize.x % 2 == layerSize.x % 2) ? 0.5f : 0f;
         float y = (baseSize.y % 2 == layerSize.y % 2) ? 0.5f : 0f;
         return new Vector2(x, y);
-    }
-
-    private string[] GetPatternRows(SortingBoardPattern pattern)
-    {
-        return SortingBoardPatterns.GetPatternRows(pattern);
     }
 
     private Color PreviewColor(int layer)
@@ -371,6 +413,8 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         }
 
         ParseLine(line);
+        AutoNestLoadedLayers();
+        RefreshPreviewScene();
     }
 
     private void ParseLine(string line)
@@ -389,14 +433,18 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         layers.Clear();
         foreach (string layerText in parts[7].Split('|'))
         {
-            layers.Add(ParseLayer(layerText));
+            layers.Add(ParseLayer(layerText, layers.Count));
         }
         if (layers.Count == 0) layers.Add(new EditableLayer());
+        NormalizeLayerOffsets();
     }
 
-    private EditableLayer ParseLayer(string text)
+    private EditableLayer ParseLayer(string text, int index)
     {
-        var layer = new EditableLayer();
+        var layer = new EditableLayer
+        {
+            offset = index > 0 ? new Vector2(0.5f, 0.5f) : Vector2.zero
+        };
         string[] pair = text.Split('@');
         string patternText = pair[0];
         if (patternText.StartsWith("Custom:", StringComparison.OrdinalIgnoreCase))
@@ -423,6 +471,8 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
 
     private void SaveLevel()
     {
+        AutoNestLoadedLayers();
+        NormalizeLayerOffsets();
         Directory.CreateDirectory(Path.GetDirectoryName(CsvAssetPath));
         string newLine = BuildCsvLine();
         var lines = File.Exists(CsvAssetPath)
@@ -444,7 +494,153 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         File.WriteAllLines(CsvAssetPath, lines);
         AssetDatabase.ImportAsset(CsvAssetPath);
         SortingLevelService.ClearCache();
+        RefreshPreviewScene();
         EditorUtility.DisplayDialog("Level Saved", $"Saved level {level} to levels.csv", "OK");
+    }
+
+    private void AutoNestLoadedLayers()
+    {
+        if (layers.Count <= 1)
+        {
+            return;
+        }
+
+        int previousCount = CountLayerTiles(layers[0]);
+        for (int i = 1; i < layers.Count; i++)
+        {
+            int layerCount = CountLayerTiles(layers[i]);
+            int autoCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
+            int targetCount = ResolveNestedTargetCount(layerCount, autoCount);
+            if (!layers[i].useCustom
+                || layerCount % 3 != 0
+                || layerCount < targetCount
+                || !IsNestedOnSource(layers[i - 1], layers[i]))
+            {
+                AutoNestLayers();
+                return;
+            }
+
+            previousCount = layerCount;
+        }
+    }
+
+    private int ResolveNestedTargetCount(int existingCount, int autoCount)
+    {
+        if (existingCount <= 0)
+        {
+            return autoCount;
+        }
+
+        if (existingCount <= 6)
+        {
+            return Mathf.Max(existingCount, autoCount);
+        }
+
+        int cappedAuto = existingCount * 2;
+        return Mathf.Max(existingCount, Mathf.Min(autoCount, cappedAuto));
+    }
+
+    private void NormalizeLayerOffsets()
+    {
+        if (layers.Count == 0)
+        {
+            return;
+        }
+
+        layers[0].offset = Vector2.zero;
+        for (int i = 1; i < layers.Count; i++)
+        {
+            if (Mathf.Approximately(layers[i].offset.x, 0f) && Mathf.Approximately(layers[i].offset.y, 0f))
+            {
+                layers[i].offset = new Vector2(0.5f, 0.5f);
+            }
+        }
+    }
+
+    private bool IsNestedOnSource(EditableLayer source, EditableLayer nested)
+    {
+        if (source == null || nested == null || !nested.useCustom)
+        {
+            return false;
+        }
+
+        string[] sourceRows = GetLayerRows(source);
+        if (sourceRows == null || sourceRows.Length <= 1)
+        {
+            return false;
+        }
+
+        int sourceCols = sourceRows.Max(x => x.Length);
+        int maxCols = sourceCols - 1;
+        int maxRows = sourceRows.Length - 1;
+        if (nested.cols > maxCols || nested.rows > maxRows)
+        {
+            return false;
+        }
+
+        EnsureGridSize(nested);
+        for (int offsetY = 0; offsetY <= maxRows - nested.rows; offsetY++)
+        {
+            for (int offsetX = 0; offsetX <= maxCols - nested.cols; offsetX++)
+            {
+                bool valid = true;
+                for (int r = 0; r < nested.rows && valid; r++)
+                {
+                    for (int c = 0; c < nested.cols; c++)
+                    {
+                        if (!nested.grid[r, c])
+                        {
+                            continue;
+                        }
+
+                        int x = c + offsetX;
+                        int y = r + offsetY;
+                        if (!HasGridCell(sourceRows, x, y)
+                            || !HasGridCell(sourceRows, x + 1, y)
+                            || !HasGridCell(sourceRows, x, y + 1)
+                            || !HasGridCell(sourceRows, x + 1, y + 1))
+                        {
+                            valid = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (valid)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private string[] GetLayerRows(EditableLayer layer)
+    {
+        if (layer == null)
+        {
+            return null;
+        }
+
+        return layer.useCustom
+            ? BuildCustomGrid(layer).Split('/')
+            : GetPatternRows(layer.pattern);
+    }
+
+    private static bool HasGridCell(string[] rows, int x, int y)
+    {
+        return rows != null
+            && y >= 0
+            && y < rows.Length
+            && x >= 0
+            && x < rows[y].Length
+            && rows[y][x] == 'X';
+    }
+
+    private void RefreshPreviewScene()
+    {
+        SortingLevelScenePreviewBuilder.RefreshIfOpen(BuildCurrentDefinition());
     }
 
     private string BuildCsvLine()
@@ -475,7 +671,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
             threeStarSeconds = Mathf.Max(0, threeStarSeconds),
             twoStarSeconds = Mathf.Max(0, twoStarSeconds),
             clearCoinReward = Mathf.Max(0, clearReward),
-            matchCoinReward = level <= 20 ? 5 : level <= 50 ? 8 : level <= 100 ? 12 : 15,
+            matchCoinReward = SortingLevelGenerator.MatchCoinForLevel(Mathf.Max(1, level)),
             seed = Mathf.Max(1, level) * 73 + 11,
         };
 
@@ -600,7 +796,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         public int rows = 5;
         public int cols = 5;
         public bool[,] grid = new bool[5, 5];
-        public Vector2 offset = new Vector2(0.5f, 0.5f);
+        public Vector2 offset = Vector2.zero;
         public float clip = 1.0f;
     }
 

@@ -127,14 +127,6 @@ public static class SortingLevelService
         csvDefinitions = null;
     }
 
-    private static int MatchCoinForLevel(int level)
-    {
-        if (level <= 20) return 5;
-        if (level <= 50) return 8;
-        if (level <= 100) return 12;
-        return 15;
-    }
-
     private static bool TryGetCsvDefinition(int level, out SortingLevelDefinition definition)
     {
         EnsureCsvDefinitionsLoaded();
@@ -203,7 +195,7 @@ public static class SortingLevelService
             threeStarSeconds = Mathf.Max(0, threeStarSeconds),
             twoStarSeconds = Mathf.Max(0, twoStarSeconds),
             clearCoinReward = Mathf.Max(0, reward),
-            matchCoinReward = MatchCoinForLevel(level),
+            matchCoinReward = SortingLevelGenerator.MatchCoinForLevel(level),
             seed = level * 73 + 11,
         };
 

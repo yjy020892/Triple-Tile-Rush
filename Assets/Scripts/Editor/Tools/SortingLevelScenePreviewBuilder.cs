@@ -10,6 +10,7 @@ using UnityEngine.UI;
 public static class SortingLevelScenePreviewBuilder
 {
     private const string PreviewScenePath = "Assets/Scenes/LevelPatternPreview.unity";
+    private const float TileVisualScale = 1.08f;
 
     private sealed class PreviewTileState
     {
@@ -17,6 +18,7 @@ public static class SortingLevelScenePreviewBuilder
         public int stackDepth;
         public float posX;
         public float posY;
+        public float tileSize;
     }
 
     public static void Open(SortingLevelDefinition definition)
@@ -37,6 +39,37 @@ public static class SortingLevelScenePreviewBuilder
         EditorSceneManager.SaveScene(scene, PreviewScenePath);
         Selection.activeGameObject = GameObject.Find("BoardRoot");
         SceneView.lastActiveSceneView?.FrameSelected();
+    }
+
+    public static void RefreshIfOpen(SortingLevelDefinition definition)
+    {
+        if (definition == null)
+        {
+            return;
+        }
+
+        Scene scene = EditorSceneManager.GetSceneByPath(PreviewScenePath);
+        if (!scene.IsValid() || !scene.isLoaded)
+        {
+            return;
+        }
+
+        RebuildLoadedScene(scene, definition);
+        Selection.activeGameObject = GameObject.Find("BoardRoot");
+        SceneView.lastActiveSceneView?.FrameSelected();
+    }
+
+    private static void RebuildLoadedScene(Scene scene, SortingLevelDefinition definition)
+    {
+        GameObject[] roots = scene.GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            Object.DestroyImmediate(roots[i]);
+        }
+
+        Build(scene, definition);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
     }
 
     private static void Build(Scene scene, SortingLevelDefinition definition)
@@ -87,7 +120,7 @@ public static class SortingLevelScenePreviewBuilder
         Rect boardRect = new Rect(-540f, -960f, 1080f, 1920f);
         List<SortingItemType> items = SortingLevelService.BuildBoardItems(definition);
         List<PreviewTileState> states = BuildTileStates(definition, items, boardRect);
-        BuildTiles(boardRoot, states, definition, boardRect);
+        BuildTiles(boardRoot, states);
 
         EditorUtility.SetDirty(canvasObject);
     }
@@ -118,17 +151,7 @@ public static class SortingLevelScenePreviewBuilder
         for (int attempt = 0; attempt < 12; attempt++)
         {
             layerCells = LayoutLayers(layers, perLayer, playRect, cellSize);
-            bool allFit = true;
-            for (int l = 0; l < perLayer.Length; l++)
-            {
-                if (layerCells[l].Count < perLayer[l])
-                {
-                    allFit = false;
-                    break;
-                }
-            }
-
-            if (allFit) break;
+            if (perLayer.Length == 0 || layerCells[0].Count >= perLayer[0]) break;
             cellSize *= 0.93f;
         }
 
@@ -145,7 +168,8 @@ public static class SortingLevelScenePreviewBuilder
                     itemType = shuffled[nextType++],
                     stackDepth = l,
                     posX = pos.x,
-                    posY = pos.y * 0.97f + yShift
+                    posY = pos.y + yShift,
+                    tileSize = cellSize * TileVisualScale
                 });
             }
         }
@@ -153,16 +177,9 @@ public static class SortingLevelScenePreviewBuilder
         return states;
     }
 
-    private static void BuildTiles(RectTransform boardRoot, List<PreviewTileState> states, SortingLevelDefinition definition, Rect boardRect)
+    private static void BuildTiles(RectTransform boardRoot, List<PreviewTileState> states)
     {
         if (states == null || states.Count == 0) return;
-
-        List<SortingBoardLayerDefinition> layers = GetLayoutLayers(definition);
-        float topReserve = 30f;
-        float bottomReserve = 220f;
-        float effHeight = Mathf.Max(360f, boardRect.height - topReserve - bottomReserve);
-        Rect playRect = new Rect(boardRect.x, boardRect.y, boardRect.width, effHeight);
-        float tileSize = ComputeCellSizeForLayout(states.Count, layers, playRect) * 0.96f;
 
         List<PreviewTileState> ordered = states
             .OrderBy(x => x.stackDepth)
@@ -174,6 +191,7 @@ public static class SortingLevelScenePreviewBuilder
         for (int i = 0; i < ordered.Count; i++)
         {
             PreviewTileState state = ordered[i];
+            float tileSize = state.tileSize > 0f ? state.tileSize : 64f;
             GameObject itemObject = CreateItemObject(boardRoot, $"Tile_{i}_{state.stackDepth}_{state.itemType}");
             RectTransform itemRect = itemObject.GetComponent<RectTransform>();
             itemRect.sizeDelta = new Vector2(tileSize, tileSize);
@@ -278,7 +296,7 @@ public static class SortingLevelScenePreviewBuilder
             Vector2 offset = layer != null ? layer.cellOffset * cellSize : Vector2.zero;
             if (l > 0)
             {
-                Vector2Int baseSize = layers != null && layers.Count > 0 ? GetLayerGridSize(layers[0]) : Vector2Int.zero;
+                Vector2Int baseSize = layers != null && l - 1 < layers.Count ? GetLayerGridSize(layers[l - 1]) : Vector2Int.zero;
                 Vector2Int layerSize = GetLayerGridSize(layer);
                 offset = CalculateDiagonalLayerOffset(baseSize, layerSize, cellSize);
             }
@@ -295,7 +313,11 @@ public static class SortingLevelScenePreviewBuilder
 
     private static Vector2Int GetLayerGridSize(SortingBoardLayerDefinition layer)
     {
-        if (layer == null) return Vector2Int.zero;
+        if (layer == null)
+        {
+            return Vector2Int.zero;
+        }
+
         return !string.IsNullOrWhiteSpace(layer.customGrid)
             ? SortingBoardPatterns.GetGridSize(layer.customGrid)
             : SortingBoardPatterns.GetPatternGridSize(layer.pattern);
@@ -308,32 +330,27 @@ public static class SortingLevelScenePreviewBuilder
             return new Vector2(cellSize * 0.5f, cellSize * 0.5f);
         }
 
-        float x = baseSize.x % 2 == layerSize.x % 2 ? cellSize * 0.5f : 0f;
-        float y = baseSize.y % 2 == layerSize.y % 2 ? cellSize * 0.5f : 0f;
+        float x = NeedsHalfOffset(baseSize.x, layerSize.x) ? cellSize * 0.5f : 0f;
+        float y = NeedsHalfOffset(baseSize.y, layerSize.y) ? cellSize * 0.5f : 0f;
         return new Vector2(x, y);
+    }
+
+    private static bool NeedsHalfOffset(int baseCells, int layerCells)
+    {
+        bool baseGridIsOnWholeCells = baseCells % 2 == 1;
+        bool layerGridIsOnWholeCells = layerCells % 2 == 1;
+        return baseGridIsOnWholeCells == layerGridIsOnWholeCells;
     }
 
     private static float ComputeCellSizeForLayout(int totalCount, List<SortingBoardLayerDefinition> layers, Rect boardRect)
     {
-        Vector2Int maxPatternSize = Vector2Int.zero;
-        if (layers != null)
+        Vector2Int basePatternSize = layers != null && layers.Count > 0
+            ? GetLayerGridSize(layers[0])
+            : Vector2Int.zero;
+        if (basePatternSize.x > 0 && basePatternSize.y > 0)
         {
-            for (int i = 0; i < layers.Count; i++)
-            {
-                SortingBoardLayerDefinition layer = layers[i];
-                SortingBoardPattern pattern = layer != null ? layer.pattern : SortingBoardPattern.Grid;
-                Vector2Int size = layer != null && !string.IsNullOrWhiteSpace(layer.customGrid)
-                    ? SortingBoardPatterns.GetGridSize(layer.customGrid)
-                    : SortingBoardPatterns.GetPatternGridSize(pattern);
-                maxPatternSize.x = Mathf.Max(maxPatternSize.x, size.x);
-                maxPatternSize.y = Mathf.Max(maxPatternSize.y, size.y);
-            }
-        }
-
-        if (maxPatternSize.x > 0 && maxPatternSize.y > 0)
-        {
-            float byWidth = boardRect.width * 0.94f / maxPatternSize.x;
-            float byHeight = boardRect.height * 0.92f / maxPatternSize.y;
+            float byWidth = boardRect.width * 0.94f / basePatternSize.x;
+            float byHeight = boardRect.height * 0.92f / basePatternSize.y;
             return Mathf.Clamp(Mathf.Min(byWidth, byHeight), 38f, 118f);
         }
 

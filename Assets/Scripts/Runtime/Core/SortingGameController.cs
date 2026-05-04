@@ -55,6 +55,8 @@ public partial class SortingGameController : MonoBehaviour
     private Button extraSlotButton;
     private Button hintButton;
 
+    private const float TileVisualScale = 1.08f;
+
     private ISortingAnalyticsService analyticsService;
     private SortingWallet wallet;
     private SortingCommerce commerce;
@@ -336,13 +338,13 @@ public partial class SortingGameController : MonoBehaviour
 
         rootCanvas = sceneCanvas;
         safeAreaRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SafeArea");
-        boardRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "BoardRoot");
-        bottomRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "BottomRoot");
-        slotRoot = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SlotRoot");
-        if (safeAreaRoot == null || boardRoot == null || bottomRoot == null || slotRoot == null)
-        {
-            return false;
-        }
+        boardRoot    = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "BoardRoot");
+        bottomRoot   = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "BottomRoot");
+        slotRoot     = FindNamedComponentInChildren<RectTransform>(rootCanvas.transform, "SlotRoot");
+        if (safeAreaRoot == null) { Debug.LogError("[SortingGameController] Canvas child 'SafeArea' not found."); return false; }
+        if (boardRoot    == null) { Debug.LogError("[SortingGameController] Canvas child 'BoardRoot' not found."); return false; }
+        if (bottomRoot   == null) { Debug.LogError("[SortingGameController] Canvas child 'BottomRoot' not found."); return false; }
+        if (slotRoot     == null) { Debug.LogError("[SortingGameController] Canvas child 'SlotRoot' not found."); return false; }
 
         stageText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "LevelLabel");
         stageSubText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "StageSub");
@@ -672,15 +674,10 @@ public partial class SortingGameController : MonoBehaviour
         for (int attempt = 0; attempt < 12; attempt++)
         {
             layerCells = LayoutLayers(layoutLayers, perLayer, playRect, cellSize);
-            bool allFit = true;
-            for (int l = 0; l < layerCount; l++)
-            {
-                if (layerCells[l].Count < perLayer[l]) { allFit = false; break; }
-            }
-            if (allFit) break;
+            if (layerCount == 0 || layerCells[0].Count >= perLayer[0]) break;
             cellSize *= 0.93f;
         }
-        currentTileSize = cellSize * 0.96f;
+        currentTileSize = cellSize * TileVisualScale;
 
         int nextType = 0;
         for (int l = 0; l < layerCount; l++)
@@ -700,7 +697,7 @@ public partial class SortingGameController : MonoBehaviour
                     stackId = states.Count,
                     stackDepth = l,
                     posX = pos.x,
-                    posY = pos.y * 0.97f + yLift + yShift
+                    posY = pos.y + yLift + yShift
                 });
             }
         }
@@ -815,11 +812,11 @@ public partial class SortingGameController : MonoBehaviour
             Vector2 offset = layer != null ? layer.cellOffset * cellSize : Vector2.zero;
             if (l > 0)
             {
-                Vector2Int baseSize = layers != null && layers.Count > 0
-                    ? GetLayerGridSize(layers[0])
+                Vector2Int previousSize = layers != null && l - 1 < layers.Count
+                    ? GetLayerGridSize(layers[l - 1])
                     : Vector2Int.zero;
                 Vector2Int layerSize = GetLayerGridSize(layer);
-                offset = CalculateDiagonalLayerOffset(baseSize, layerSize, cellSize);
+                offset = CalculateDiagonalLayerOffset(previousSize, layerSize, cellSize);
             }
 
             List<Vector2> cells = layer != null && !string.IsNullOrWhiteSpace(layer.customGrid)
@@ -854,7 +851,11 @@ public partial class SortingGameController : MonoBehaviour
 
     private Vector2Int GetLayerGridSize(SortingBoardLayerDefinition layer)
     {
-        if (layer == null) return Vector2Int.zero;
+        if (layer == null)
+        {
+            return Vector2Int.zero;
+        }
+
         return !string.IsNullOrWhiteSpace(layer.customGrid)
             ? SortingBoardPatterns.GetGridSize(layer.customGrid)
             : SortingBoardPatterns.GetPatternGridSize(layer.pattern);
@@ -881,24 +882,13 @@ public partial class SortingGameController : MonoBehaviour
 
     private float ComputeCellSizeForLayout(int totalCount, List<SortingBoardLayerDefinition> layers, Rect boardRect)
     {
-        Vector2Int maxPatternSize = Vector2Int.zero;
-        if (layers != null)
+        Vector2Int basePatternSize = layers != null && layers.Count > 0
+            ? GetLayerGridSize(layers[0])
+            : Vector2Int.zero;
+        if (basePatternSize.x > 0 && basePatternSize.y > 0)
         {
-            for (int i = 0; i < layers.Count; i++)
-            {
-                SortingBoardPattern pattern = layers[i] != null ? layers[i].pattern : SortingBoardPattern.Grid;
-                Vector2Int size = layers[i] != null && !string.IsNullOrWhiteSpace(layers[i].customGrid)
-                    ? SortingBoardPatterns.GetGridSize(layers[i].customGrid)
-                    : SortingBoardPatterns.GetPatternGridSize(pattern);
-                maxPatternSize.x = Mathf.Max(maxPatternSize.x, size.x);
-                maxPatternSize.y = Mathf.Max(maxPatternSize.y, size.y);
-            }
-        }
-
-        if (maxPatternSize.x > 0 && maxPatternSize.y > 0)
-        {
-            float byWidth = (boardRect.width * 0.94f) / maxPatternSize.x;
-            float byHeight = (boardRect.height * 0.92f) / maxPatternSize.y;
+            float byWidth = (boardRect.width * 0.94f) / basePatternSize.x;
+            float byHeight = (boardRect.height * 0.92f) / basePatternSize.y;
             return Mathf.Clamp(Mathf.Min(byWidth, byHeight), 38f, 118f);
         }
 
@@ -965,7 +955,7 @@ public partial class SortingGameController : MonoBehaviour
             : ComputeCellSizeForLayout(
                 boardStates.Count,
                 GetBoardLayoutLayers(),
-                boardRoot.rect) * 0.96f;
+                boardRoot.rect) * TileVisualScale;
         currentTileSize = tileSize;
 
         for (int i = 0; i < boardStates.Count; i++)

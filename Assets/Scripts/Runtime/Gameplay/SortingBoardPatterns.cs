@@ -829,6 +829,169 @@ public static class SortingBoardPatterns
         return count;
     }
 
+    public static Vector2 CalculateCentroid(List<Vector2> cells)
+    {
+        if (cells == null || cells.Count == 0)
+        {
+            return Vector2.zero;
+        }
+
+        float sumX = 0f;
+        float sumY = 0f;
+        for (int i = 0; i < cells.Count; i++)
+        {
+            sumX += cells[i].x;
+            sumY += cells[i].y;
+        }
+
+        float inv = 1f / cells.Count;
+        return new Vector2(sumX * inv, sumY * inv);
+    }
+
+    public static string BuildNestedCustomGrid(SortingBoardPattern sourcePattern, int targetCount, int variant = 0)
+    {
+        string[] rows = GetPatternRows(sourcePattern);
+        return BuildNestedCustomGrid(rows, targetCount, variant);
+    }
+
+    public static string BuildCustomGrid(SortingBoardPattern sourcePattern)
+    {
+        string[] rows = GetPatternRows(sourcePattern);
+        return rows == null || rows.Length == 0 ? string.Empty : string.Join("/", rows);
+    }
+
+    public static string BuildNestedCustomGrid(string customGrid, int targetCount, int variant = 0)
+    {
+        string[] rows = ParseCustomGrid(customGrid);
+        return BuildNestedCustomGrid(rows, targetCount, variant);
+    }
+
+    private static string BuildNestedCustomGrid(string[] rows, int targetCount, int variant)
+    {
+        if (rows == null || rows.Length == 0 || targetCount <= 0)
+        {
+            return string.Empty;
+        }
+
+        int sourceCount = GetGridCellCount(string.Join("/", rows));
+        if (sourceCount <= 0)
+        {
+            return string.Empty;
+        }
+
+        int sourceRows = rows.Length;
+        int sourceCols = 0;
+        for (int r = 0; r < sourceRows; r++)
+        {
+            if (rows[r].Length > sourceCols) sourceCols = rows[r].Length;
+        }
+
+        if (sourceCols <= 1 || sourceRows <= 1)
+        {
+            return string.Empty;
+        }
+
+        float sourceCenterX = (sourceCols - 1) * 0.5f;
+        float sourceCenterY = (sourceRows - 1) * 0.5f;
+
+        var cells = new List<(int x, int y, float dist, float tie)>((sourceCols - 1) * (sourceRows - 1));
+        for (int r = 0; r < sourceRows - 1; r++)
+        {
+            for (int c = 0; c < sourceCols - 1; c++)
+            {
+                if (!HasCell(rows, c, r)
+                    || !HasCell(rows, c + 1, r)
+                    || !HasCell(rows, c, r + 1)
+                    || !HasCell(rows, c + 1, r + 1))
+                {
+                    continue;
+                }
+
+                float x = c + 0.5f;
+                float y = r + 0.5f;
+                float dx = x - sourceCenterX;
+                float dy = y - sourceCenterY;
+                float dist = dx * dx + dy * dy;
+                float tie = Mathf.Abs(dx) + Mathf.Abs(dy) * 0.37f + variant * 0.013f;
+                cells.Add((c, r, dist, tie));
+            }
+        }
+
+        if (cells.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        cells.Sort((a, b) =>
+        {
+            int cmp = a.dist.CompareTo(b.dist);
+            if (cmp != 0) return cmp;
+            cmp = a.tie.CompareTo(b.tie);
+            if (cmp != 0) return cmp;
+            cmp = a.y.CompareTo(b.y);
+            if (cmp != 0) return cmp;
+            return a.x.CompareTo(b.x);
+        });
+
+        int take = NormalizeNestedCount(Mathf.Clamp(targetCount, 1, cells.Count));
+
+        int minX = int.MaxValue;
+        int minY = int.MaxValue;
+        int maxX = int.MinValue;
+        int maxY = int.MinValue;
+        for (int i = 0; i < take; i++)
+        {
+            minX = Mathf.Min(minX, cells[i].x);
+            minY = Mathf.Min(minY, cells[i].y);
+            maxX = Mathf.Max(maxX, cells[i].x);
+            maxY = Mathf.Max(maxY, cells[i].y);
+        }
+
+        int width = Mathf.Max(1, maxX - minX + 1);
+        int height = Mathf.Max(1, maxY - minY + 1);
+        char[][] output = new char[height][];
+        for (int r = 0; r < height; r++)
+        {
+            output[r] = new string('.', width).ToCharArray();
+        }
+
+        for (int i = 0; i < take; i++)
+        {
+            int x = cells[i].x - minX;
+            int y = cells[i].y - minY;
+            output[y][x] = 'X';
+        }
+
+        var packed = new List<string>(height);
+        for (int r = 0; r < height; r++)
+        {
+            packed.Add(new string(output[r]));
+        }
+
+        return string.Join("/", packed);
+    }
+
+    private static int NormalizeNestedCount(int count)
+    {
+        if (count <= 3)
+        {
+            return Mathf.Max(1, count);
+        }
+
+        int normalized = count - count % 3;
+        return Mathf.Max(3, normalized);
+    }
+
+    private static bool HasCell(string[] rows, int x, int y)
+    {
+        return rows != null
+            && y >= 0
+            && y < rows.Length
+            && x >= 0
+            && x < rows[y].Length
+            && rows[y][x] == 'X';
+    }
+
     public static Vector2Int GetGridSize(string customGrid)
     {
         string[] grid = ParseCustomGrid(customGrid);
@@ -857,7 +1020,7 @@ public static class SortingBoardPatterns
             return Resolve(SortingBoardPattern.Grid, needed, boardRect, cellSize, originOffset, clipEnvelope);
         }
 
-        return ResolveStringGrid(grid, needed, boardRect, cellSize, originOffset, clipEnvelope);
+        return ResolveStringGrid(grid, needed, boardRect, cellSize, originOffset, clipEnvelope, false);
     }
 
     public static bool HasMatchableCellCount(SortingBoardPattern pattern)
@@ -961,7 +1124,7 @@ public static class SortingBoardPatterns
 
     private static List<Vector2> ResolveStringGrid(
         string[] grid, int needed, Rect boardRect, float cellSize,
-        Vector2 originOffset, float clipEnvelope)
+        Vector2 originOffset, float clipEnvelope, bool applyClip = false)
     {
         int gridRows = grid.Length;
         int gridCols = 0;
@@ -986,7 +1149,7 @@ public static class SortingBoardPatterns
                 float x    = rawX + originOffset.x;
                 float y    = rawY + originOffset.y;
 
-                if (Mathf.Abs(x) > maxAbsX || Mathf.Abs(y) > maxAbsY) continue;
+                if (applyClip && (Mathf.Abs(x) > maxAbsX || Mathf.Abs(y) > maxAbsY)) continue;
 
                 patternCells.Add((new Vector2(x, y), rawX * rawX + rawY * rawY));
             }

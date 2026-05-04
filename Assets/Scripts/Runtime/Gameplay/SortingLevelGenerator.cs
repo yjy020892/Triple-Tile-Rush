@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 //
@@ -5,6 +7,8 @@ using UnityEngine;
 //
 public static class SortingLevelGenerator
 {
+    private const float NestedLayerFillRatio = 0.72f;
+
     public static SortingLevelDefinition Generate(int levelIndex)
     {
         int level = Mathf.Max(1, levelIndex);
@@ -135,7 +139,7 @@ public static class SortingLevelGenerator
     }
 
 
-    private static int MatchCoinForLevel(int level)
+    public static int MatchCoinForLevel(int level)
     {
         if (level <= 20)  return 5;
         if (level <= 50)  return 8;
@@ -224,11 +228,19 @@ public static class SortingLevelGenerator
             clipEnvelope = 1.0f
         });
 
+        int previousCount = SortingBoardPatterns.GetDesignedTileCount(basePattern);
+        string previousGrid = SortingBoardPatterns.BuildCustomGrid(basePattern);
+
         if (ShouldAddSecondLayer(level, isRest, isMilestone))
         {
+            int targetCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
+            string nestedGrid = SortingBoardPatterns.BuildNestedCustomGrid(previousGrid, targetCount, 1);
+            previousGrid = string.IsNullOrWhiteSpace(nestedGrid) ? previousGrid : nestedGrid;
+            previousCount = SortingBoardPatterns.GetGridCellCount(previousGrid);
             def.layerLayouts.Add(new SortingBoardLayerDefinition
             {
-                pattern = PickLayerPattern(level, 1),
+                pattern = SortingBoardPattern.Grid,
+                customGrid = previousGrid,
                 cellOffset = new Vector2(0.5f, 0.5f),
                 clipEnvelope = 0.72f
             });
@@ -236,9 +248,13 @@ public static class SortingLevelGenerator
 
         if (ShouldAddThirdLayer(level, isRest, isMilestone))
         {
+            int targetCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
+            string nestedGrid = SortingBoardPatterns.BuildNestedCustomGrid(previousGrid, targetCount, 2);
+            previousGrid = string.IsNullOrWhiteSpace(nestedGrid) ? previousGrid : nestedGrid;
             def.layerLayouts.Add(new SortingBoardLayerDefinition
             {
-                pattern = PickLayerPattern(level, 2),
+                pattern = SortingBoardPattern.Grid,
+                customGrid = previousGrid,
                 cellOffset = new Vector2(0.5f, 0.5f),
                 clipEnvelope = 0.52f
             });
