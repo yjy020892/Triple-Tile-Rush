@@ -60,7 +60,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         }
 
         theme = (SortingTheme)EditorGUILayout.EnumPopup("Theme", theme);
-        typeCount = EditorGUILayout.IntSlider("Icon Types", typeCount, 1, 8);
+        typeCount = EditorGUILayout.IntSlider("Icon Types", typeCount, 1, 10);
         slotCapacity = EditorGUILayout.IntSlider("Tray Slots", slotCapacity, 4, 9);
         threeStarSeconds = EditorGUILayout.IntField("3 Star Seconds", threeStarSeconds);
         twoStarSeconds = EditorGUILayout.IntField("2 Star Seconds", twoStarSeconds);
@@ -663,7 +663,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         {
             levelIndex = Mathf.Max(1, level),
             theme = theme,
-            typeCount = Mathf.Clamp(typeCount, 1, 8),
+            typeCount = Mathf.Clamp(typeCount, 1, 10),
             setsPerType = 1,
             layerCount = Mathf.Clamp(layers.Count, 1, 3),
             slotCapacity = Mathf.Max(4, slotCapacity),

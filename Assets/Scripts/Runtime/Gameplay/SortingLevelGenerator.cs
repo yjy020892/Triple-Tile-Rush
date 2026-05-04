@@ -40,7 +40,7 @@ public static class SortingLevelGenerator
 
         if (isMilestone)
         {
-            def.typeCount        = Mathf.Min(8, def.typeCount + 1);
+            def.typeCount        = Mathf.Min(10, def.typeCount + 1);
             def.clearCoinReward += 35;
             def.threeStarSeconds = Mathf.Max(25, def.threeStarSeconds - 10);
         }
@@ -279,42 +279,6 @@ public static class SortingLevelGenerator
         if (level <= 55) return level % 5 == 0;
         if (level <= 75) return level % 4 == 0 || isMilestone;
         return level % 3 == 0 || isMilestone;
-    }
-
-    private static SortingBoardPattern PickLayerPattern(int level, int layerIndex)
-    {
-        SortingBoardPattern[] light =
-        {
-            SortingBoardPattern.LayerBlock6,
-            SortingBoardPattern.LayerBlock9,
-            SortingBoardPattern.LayerCrown15,
-            SortingBoardPattern.LayerDiamond15,
-        };
-
-        SortingBoardPattern[] medium =
-        {
-            SortingBoardPattern.LayerBlock6,
-            SortingBoardPattern.LayerBlock9,
-            SortingBoardPattern.LayerColumn15,
-            SortingBoardPattern.SmallArrow15,
-            SortingBoardPattern.LayerCrown15,
-            SortingBoardPattern.LayerDiamond15,
-        };
-
-        SortingBoardPattern[] hard =
-        {
-            SortingBoardPattern.LayerBlock9,
-            SortingBoardPattern.LayerColumn15,
-            SortingBoardPattern.LayerCorners12,
-            SortingBoardPattern.LayerCrown15,
-            SortingBoardPattern.LayerDiamond15,
-            SortingBoardPattern.LayerCap18,
-            SortingBoardPattern.SmallBlock15,
-            SortingBoardPattern.SmallTwoColumns24,
-        };
-
-        SortingBoardPattern[] pool = level < 18 ? light : level < 55 ? medium : hard;
-        return PickPatternFromPool(pool, level + layerIndex * 7);
     }
 
     private static SortingBoardPattern PickPatternFromPool(SortingBoardPattern[] pool, int startIndex)

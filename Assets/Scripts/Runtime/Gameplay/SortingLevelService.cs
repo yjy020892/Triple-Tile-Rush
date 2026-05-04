@@ -7,6 +7,7 @@ public static class SortingLevelService
 {
     private const string LevelResourcePathFormat = "Levels/Level_{0:D3}";
     private const string DesignedLevelCsvPath = "Levels/levels";
+    private const float NestedLayerFillRatio = 0.72f;
 
     private static readonly Dictionary<int, SortingLevelDefinition> definitionCache = new Dictionary<int, SortingLevelDefinition>();
     private static Dictionary<int, SortingLevelDefinition> csvDefinitions;
@@ -187,7 +188,7 @@ public static class SortingLevelService
         {
             levelIndex = level,
             theme = theme,
-            typeCount = Mathf.Clamp(typeCount, 1, 8),
+            typeCount = Mathf.Clamp(typeCount, 1, 10),
             setsPerType = 1,
             layerCount = 1,
             slotCapacity = Mathf.Max(4, slotCapacity),
@@ -213,9 +214,77 @@ public static class SortingLevelService
         {
             definition.boardPattern = definition.layerLayouts[0].pattern;
             definition.layerCount = Mathf.Clamp(definition.layerLayouts.Count, 1, 3);
+            AutoNestCsvMarkerLayers(definition);
         }
 
         return definition.layerLayouts.Count > 0 || definition.boardPattern == SortingBoardPattern.Grid;
+    }
+
+    private static void AutoNestCsvMarkerLayers(SortingLevelDefinition definition)
+    {
+        if (definition == null || definition.layerLayouts == null || definition.layerLayouts.Count <= 1)
+        {
+            return;
+        }
+
+        SortingBoardLayerDefinition baseLayer = definition.layerLayouts[0];
+        string sourceGrid = !string.IsNullOrWhiteSpace(baseLayer.customGrid)
+            ? baseLayer.customGrid
+            : SortingBoardPatterns.BuildCustomGrid(baseLayer.pattern);
+        int previousCount = GetLayerDesignedTileCount(baseLayer);
+
+        if (string.IsNullOrWhiteSpace(sourceGrid) || previousCount <= 0)
+        {
+            return;
+        }
+
+        for (int i = 1; i < definition.layerLayouts.Count; i++)
+        {
+            SortingBoardLayerDefinition layer = definition.layerLayouts[i];
+            if (layer == null)
+            {
+                continue;
+            }
+
+            bool shouldAutoNest = string.IsNullOrWhiteSpace(layer.customGrid);
+            if (shouldAutoNest)
+            {
+                int existingCount = GetLayerDesignedTileCount(layer);
+                int autoCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
+                int targetCount = ResolveNestedTargetCount(existingCount, autoCount);
+                string nestedGrid = SortingBoardPatterns.BuildNestedCustomGrid(sourceGrid, targetCount, i);
+                if (!string.IsNullOrWhiteSpace(nestedGrid))
+                {
+                    layer.pattern = SortingBoardPattern.Grid;
+                    layer.customGrid = nestedGrid;
+                    layer.cellOffset = new Vector2(0.5f, 0.5f);
+                    previousCount = SortingBoardPatterns.GetGridCellCount(nestedGrid);
+                    sourceGrid = nestedGrid;
+                    continue;
+                }
+            }
+
+            previousCount = GetLayerDesignedTileCount(layer);
+            sourceGrid = !string.IsNullOrWhiteSpace(layer.customGrid)
+                ? layer.customGrid
+                : SortingBoardPatterns.BuildCustomGrid(layer.pattern);
+        }
+    }
+
+    private static int ResolveNestedTargetCount(int existingCount, int autoCount)
+    {
+        if (existingCount <= 0)
+        {
+            return autoCount;
+        }
+
+        if (existingCount <= 6)
+        {
+            return Mathf.Max(existingCount, autoCount);
+        }
+
+        int cappedAuto = existingCount * 2;
+        return Mathf.Max(existingCount, Mathf.Min(autoCount, cappedAuto));
     }
 
     private static SortingBoardLayerDefinition ParseLayerDefinition(string value)
@@ -349,5 +418,22 @@ public static class SortingLevelService
         }
 
         return total;
+    }
+
+    private static int GetLayerDesignedTileCount(SortingBoardLayerDefinition layer)
+    {
+        if (layer == null)
+        {
+            return 0;
+        }
+
+        if (!string.IsNullOrWhiteSpace(layer.customGrid))
+        {
+            return SortingBoardPatterns.GetGridCellCount(layer.customGrid);
+        }
+
+        return layer.pattern != SortingBoardPattern.Grid && SortingBoardPatterns.HasMatchableCellCount(layer.pattern)
+            ? SortingBoardPatterns.GetDesignedTileCount(layer.pattern)
+            : 0;
     }
 }

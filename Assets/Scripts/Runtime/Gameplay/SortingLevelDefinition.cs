@@ -9,7 +9,7 @@ public sealed class SortingLevelDefinition
     public int levelIndex = 1;
 
     [Header("Composition")]
-    [Tooltip("Number of item types used in this level. Recommended range: 1 to 8.")]
+    [Tooltip("Number of item types used in this level. Recommended range: 1 to 10.")]
     public int typeCount = 4;
 
     [Tooltip("Theme used when explicitTypes is empty.")]

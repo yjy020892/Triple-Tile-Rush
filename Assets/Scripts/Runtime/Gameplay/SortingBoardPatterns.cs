@@ -935,20 +935,8 @@ public static class SortingBoardPatterns
 
         int take = NormalizeNestedCount(Mathf.Clamp(targetCount, 1, cells.Count));
 
-        int minX = int.MaxValue;
-        int minY = int.MaxValue;
-        int maxX = int.MinValue;
-        int maxY = int.MinValue;
-        for (int i = 0; i < take; i++)
-        {
-            minX = Mathf.Min(minX, cells[i].x);
-            minY = Mathf.Min(minY, cells[i].y);
-            maxX = Mathf.Max(maxX, cells[i].x);
-            maxY = Mathf.Max(maxY, cells[i].y);
-        }
-
-        int width = Mathf.Max(1, maxX - minX + 1);
-        int height = Mathf.Max(1, maxY - minY + 1);
+        int width = Mathf.Max(1, sourceCols - 1);
+        int height = Mathf.Max(1, sourceRows - 1);
         char[][] output = new char[height][];
         for (int r = 0; r < height; r++)
         {
@@ -957,8 +945,8 @@ public static class SortingBoardPatterns
 
         for (int i = 0; i < take; i++)
         {
-            int x = cells[i].x - minX;
-            int y = cells[i].y - minY;
+            int x = cells[i].x;
+            int y = cells[i].y;
             output[y][x] = 'X';
         }
 
