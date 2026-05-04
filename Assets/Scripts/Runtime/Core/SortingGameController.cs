@@ -13,10 +13,8 @@ public partial class SortingGameController : MonoBehaviour
     private const string LevelKey = "SortingPuzzle_Level";
 
     private const int DefaultBaseSlotCapacity = 7;
-    private const int MaxExtraSlots = 3;
-    private const int HintCost = 30;
-    private const int ExtraSlotCost = 80;
     private const int ContinueCost = 150;
+    private const int MaxExtraSlots = 3;
     private const int DefaultMatchReward = 5;
     private const int DefaultClearReward = 20;
     private const float FirstClearBonusMultiplier = 2f;
@@ -52,9 +50,7 @@ public partial class SortingGameController : MonoBehaviour
     private Button continueButton;
     private Button shuffleButton;
     private Button undoButton;
-    private Button extraSlotButton;
-    private Button hintButton;
-
+    private Button eraseButton;
     private const float TileVisualScale = 1.08f;
 
     private ISortingAnalyticsService analyticsService;
@@ -362,10 +358,8 @@ public partial class SortingGameController : MonoBehaviour
         continueButton = failPopup != null ? FindButtonUnder(failPopup.transform, "SecondaryButton") : null;
 
         shuffleButton = FindButtonUnder(rootCanvas.transform, "ShuffleButton");
-        undoButton = FindButtonUnder(rootCanvas.transform, "UndoButton");
-        hintButton = FindButtonUnder(rootCanvas.transform, "HintButton");
-        extraSlotButton = FindButtonUnder(rootCanvas.transform, "ExtraSlotButton");
-
+        undoButton    = FindButtonUnder(rootCanvas.transform, "UndoButton");
+        eraseButton   = FindButtonUnder(rootCanvas.transform, "EraseButton");
         menuOverlay = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "MenuOverlay");
         settingsOverlay = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "SettingsOverlay");
         shopOverlay = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "ShopOverlay");
@@ -404,8 +398,7 @@ public partial class SortingGameController : MonoBehaviour
 
         BindButton(shuffleButton, OnShuffleClicked);
         BindButton(undoButton, OnUndoClicked);
-        BindButton(hintButton, OnHintClicked);
-        BindButton(extraSlotButton, OnExtraSlotClicked);
+        BindButton(eraseButton, OnEraseClicked);
         BindButton(nextButton, OnNextLevelClicked);
         BindButton(retryButton, OnRetryClicked);
         BindButton(continueButton, OnContinueClicked);
@@ -1260,7 +1253,6 @@ public partial class SortingGameController : MonoBehaviour
         {
             { "stage", currentLevel },
             { "coin_total", wallet.Coin },
-            { "extra_slot", extraSlotCount },
             { "clear_seconds", Mathf.RoundToInt(clearSeconds) },
             { "stars", stars },
             { "first_clear", firstClear ? 1 : 0 },
@@ -1391,6 +1383,15 @@ public partial class SortingGameController : MonoBehaviour
         TryIncreaseExtraSlot();
     }
 
+    private void TryIncreaseExtraSlot()
+    {
+        if (extraSlotCount >= MaxExtraSlots) return;
+        extraSlotCount++;
+        BuildSlotCells();
+        RefreshSlotPositions();
+        RefreshTopTexts();
+    }
+
     private void OnShuffleClicked()
     {
         if (isGameEnded || isInputLocked || boardItems.Count <= 1)
@@ -1422,170 +1423,102 @@ public partial class SortingGameController : MonoBehaviour
         RestoreSnapshot(undoSnapshots.Pop());
     }
 
-    private void OnExtraSlotClicked()
+    private void OnEraseClicked()
     {
-        if (isInputLocked || isGameEnded)
-        {
-            return;
-        }
+        if (isGameEnded || isInputLocked) return;
 
-        if (currentDefinition != null && !currentDefinition.allowExtraSlot)
+        var slotByType = slotItems
+            .GroupBy(x => x.ItemType)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var boardByType = boardItems
+            .Where(x => x != null && !x.IsRemoved)
+            .GroupBy(x => x.ItemType)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        SortingItemType targetType = SortingItemType.None;
+        int bestSlotCount = -1;
+
+        foreach (KeyValuePair<SortingItemType, int> pair in slotByType)
         {
-            if (hintInfoText != null)
+            int inBoard = boardByType.TryGetValue(pair.Key, out int b) ? b : 0;
+            if (pair.Value + inBoard >= 3 && pair.Value > bestSlotCount)
             {
-                hintInfoText.text = "EXTRA SLOT DISABLED THIS STAGE";
+                bestSlotCount = pair.Value;
+                targetType = pair.Key;
             }
-            return;
         }
 
-        if (TrySpendCoins(ExtraSlotCost))
+        if (targetType == SortingItemType.None)
         {
-            analyticsService.LogEvent("booster_extra_slot_coin", new Dictionary<string, object>
+            foreach (KeyValuePair<SortingItemType, int> pair in boardByType)
             {
-                { "stage", currentLevel },
-                { "cost", ExtraSlotCost }
-            });
-            GrantExtraSlot();
-            return;
-        }
-
-        commerce.TryShowRewarded(SortingAdPlacements.RewardedExtraSlot, GrantExtraSlot);
-    }
-
-    private void GrantExtraSlot()
-    {
-        analyticsService.LogEvent("booster_extra_slot_granted", new Dictionary<string, object>
-        {
-            { "stage", currentLevel },
-            { "slot_capacity", Mathf.Min(GetBaseSlotCapacity() + MaxExtraSlots, GetCurrentSlotCapacity() + 1) }
-        });
-        TryIncreaseExtraSlot();
-    }
-
-    private void TryIncreaseExtraSlot()
-    {
-        if (extraSlotCount >= MaxExtraSlots)
-        {
-            if (hintInfoText != null)
-            {
-                hintInfoText.text = $"EXTRA SLOT LIMIT REACHED ({GetBaseSlotCapacity() + MaxExtraSlots})";
+                if (pair.Value >= 3)
+                {
+                    targetType = pair.Key;
+                    break;
+                }
             }
-
-            RefreshTopTexts();
-            return;
         }
 
-        extraSlotCount++;
-        BuildSlotCells();
-        RefreshSlotPositions();
-        RefreshTopTexts();
+        if (targetType == SortingItemType.None) return;
+
+        PushUndoSnapshot();
+        StartCoroutine(CoExecuteErase(targetType));
     }
 
-    private void OnHintClicked()
-    {
-        if (isInputLocked || isGameEnded)
-        {
-            return;
-        }
-
-        if (TrySpendCoins(HintCost))
-        {
-            analyticsService.LogEvent("booster_hint_coin", new Dictionary<string, object>
-            {
-                { "stage", currentLevel },
-                { "cost", HintCost }
-            });
-            ExecuteHint();
-            return;
-        }
-
-        commerce.TryShowRewarded(SortingAdPlacements.RewardedHint, ExecuteHint);
-    }
-
-    private void ExecuteHint()
-    {
-        SortingItemView candidate = FindBestHintCandidate();
-        if (candidate == null)
-        {
-            return;
-        }
-
-        StartCoroutine(CoExecuteHint(candidate));
-    }
-
-    private IEnumerator CoExecuteHint(SortingItemView candidate)
+    private IEnumerator CoExecuteErase(SortingItemType targetType)
     {
         isInputLocked = true;
-        candidate.SetBusy(true);
-        hintInfoText.text = $"HINT: TRY {candidate.ItemType.ToString().ToUpperInvariant()}";
-        analyticsService.LogEvent("booster_hint_used", new Dictionary<string, object>
-        {
-            { "stage", currentLevel },
-            { "type", candidate.ItemType.ToString() }
-        });
-        yield return StartCoroutine(SortingTweenUtility.ScalePunch(candidate.transform, 0.24f, 1.16f));
-        candidate.SetBusy(false);
-        isInputLocked = false;
-    }
 
-    private SortingItemView FindBestHintCandidate()
-    {
-        List<SortingItemView> exposed = boardItems.Where(x => x != null && x.IsExposed && !x.IsRemoved).ToList();
-        if (exposed.Count == 0) return null;
-
-        var slotGroups = slotItems
-            .GroupBy(x => x.ItemType)
-            .OrderByDescending(g => g.Count())
-            .Select(g => g.Key)
+        List<SortingItemView> slotTargets = slotItems
+            .Where(x => x.ItemType == targetType)
+            .Take(3)
             .ToList();
 
-        if (slotGroups.Count > 0)
+        int fromBoard = 3 - slotTargets.Count;
+        List<SortingItemView> boardTargets = boardItems
+            .Where(x => x != null && !x.IsRemoved && x.ItemType == targetType)
+            .Take(fromBoard)
+            .ToList();
+
+        foreach (SortingItemView item in slotTargets)
+            StartCoroutine(SortingTweenUtility.ScalePunch(item.transform, 0.18f, 1.12f));
+        foreach (SortingItemView item in boardTargets)
+            StartCoroutine(SortingTweenUtility.ScalePunch(item.transform, 0.18f, 1.12f));
+
+        yield return new WaitForSecondsRealtime(0.18f);
+
+        foreach (SortingItemView item in slotTargets)
         {
-            foreach (SortingItemType target in slotGroups)
-            {
-                SortingItemView direct = exposed.FirstOrDefault(x => x.ItemType == target);
-                if (direct != null) return direct;
-            }
-
-            List<SortingItemView> buried = boardItems
-                .Where(x => x != null && !x.IsRemoved && !x.IsExposed).ToList();
-            var slotTypeSet = new HashSet<SortingItemType>(slotGroups);
-
-            foreach (SortingItemType target in slotGroups)
-            {
-                var buriedTargets = buried.Where(x => x.ItemType == target).ToList();
-                if (buriedTargets.Count == 0) continue;
-
-                var blockers = exposed
-                    .Where(exp => buriedTargets.Any(b => HintOverlapsAndAbove(exp, b)))
-                    .ToList();
-
-                if (blockers.Count == 0) continue;
-
-                SortingItemView best = blockers.FirstOrDefault(b => slotTypeSet.Contains(b.ItemType))
-                                    ?? blockers[0];
-                return best;
-            }
+            slotItems.Remove(item);
+            Destroy(item.gameObject);
+        }
+        foreach (SortingItemView item in boardTargets)
+        {
+            boardItems.Remove(item);
+            Destroy(item.gameObject);
         }
 
-        var slotTypeDict = slotItems.GroupBy(x => x.ItemType).ToDictionary(g => g.Key, g => g.Count());
-        SortingItemView fallback = null;
-        int bestScore = int.MinValue;
-        foreach (SortingItemView item in exposed)
+        SortingAudio.Play(SortingAudio.Sfx.Match);
+        analyticsService.LogEvent("booster_erase", new Dictionary<string, object>
         {
-            int score = (slotTypeDict.TryGetValue(item.ItemType, out int c) ? c * 10 : 0)
-                      + exposed.Count(x => x.ItemType == item.ItemType);
-            if (score > bestScore) { bestScore = score; fallback = item; }
-        }
-        return fallback;
-    }
+            { "stage", currentLevel },
+            { "type", targetType.ToString() },
+            { "from_slot", slotTargets.Count },
+            { "from_board", boardTargets.Count }
+        });
 
-    private bool HintOverlapsAndAbove(SortingItemView upper, SortingItemView lower)
-    {
-        if (upper.transform.GetSiblingIndex() <= lower.transform.GetSiblingIndex()) return false;
-        float sz = (upper.RectTransform.rect.width + lower.RectTransform.rect.width) * 0.34f;
-        Vector2 d = upper.RectTransform.anchoredPosition - lower.RectTransform.anchoredPosition;
-        return Mathf.Abs(d.x) <= sz && Mathf.Abs(d.y) <= sz;
+        RefreshBoardExposure();
+        RefreshSlotPositions();
+        RefreshTopTexts();
+
+        if (!isGameEnded && boardItems.Count == 0 && slotItems.Count == 0)
+        {
+            ClearLevel();
+        }
+
+        isInputLocked = false;
     }
 
     private bool TrySpendCoins(int amount)
@@ -1595,10 +1528,10 @@ public partial class SortingGameController : MonoBehaviour
 
     private int GetCurrentSlotCapacity()
     {
-        int baseCapacity = currentDefinition != null && currentDefinition.slotCapacity > 0
+        int base_ = currentDefinition != null && currentDefinition.slotCapacity > 0
             ? currentDefinition.slotCapacity
             : DefaultBaseSlotCapacity;
-        return baseCapacity + Mathf.Clamp(extraSlotCount, 0, MaxExtraSlots);
+        return base_ + Mathf.Clamp(extraSlotCount, 0, MaxExtraSlots);
     }
 
     private int GetBaseSlotCapacity()
