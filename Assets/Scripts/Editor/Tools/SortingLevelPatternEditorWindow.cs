@@ -412,15 +412,18 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
             return;
         }
 
-        ParseLine(line);
-        AutoNestLoadedLayers();
+        bool hasMarkerLayer = ParseLine(line);
+        if (hasMarkerLayer)
+        {
+            AutoNestLoadedLayers();
+        }
         RefreshPreviewScene();
     }
 
-    private void ParseLine(string line)
+    private bool ParseLine(string line)
     {
         string[] parts = line.Split(',');
-        if (parts.Length < 8) return;
+        if (parts.Length < 8) return false;
 
         int.TryParse(parts[0], out level);
         Enum.TryParse(parts[1], true, out theme);
@@ -431,12 +434,19 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         int.TryParse(parts[6], out clearReward);
 
         layers.Clear();
+        bool hasMarkerLayer = false;
         foreach (string layerText in parts[7].Split('|'))
         {
-            layers.Add(ParseLayer(layerText, layers.Count));
+            EditableLayer layer = ParseLayer(layerText, layers.Count);
+            layers.Add(layer);
+            if (layers.Count > 1 && !layer.useCustom)
+            {
+                hasMarkerLayer = true;
+            }
         }
         if (layers.Count == 0) layers.Add(new EditableLayer());
         NormalizeLayerOffsets();
+        return hasMarkerLayer;
     }
 
     private EditableLayer ParseLayer(string text, int index)
@@ -471,7 +481,6 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
 
     private void SaveLevel()
     {
-        AutoNestLoadedLayers();
         NormalizeLayerOffsets();
         Directory.CreateDirectory(Path.GetDirectoryName(CsvAssetPath));
         string newLine = BuildCsvLine();

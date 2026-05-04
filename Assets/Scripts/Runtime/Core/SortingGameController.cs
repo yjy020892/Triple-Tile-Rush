@@ -41,6 +41,8 @@ public partial class SortingGameController : MonoBehaviour
     private TMP_Text emptyText;
     private TMP_Text hintInfoText;
     private int lastDisplayedCoinForUi = int.MinValue;
+    private RectTransform coinChipRect;
+    private Vector3 coinChipBaseScale = Vector3.one;
     private CanvasGroup clearPopup;
     private CanvasGroup failPopup;
     private TMP_Text clearPopupBodyText;
@@ -346,6 +348,8 @@ public partial class SortingGameController : MonoBehaviour
         stageText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "LevelLabel");
         stageSubText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "StageSub");
         coinText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "CoinText");
+        coinChipRect = coinText != null ? coinText.transform.parent as RectTransform : null;
+        coinChipBaseScale = coinChipRect != null ? coinChipRect.localScale : Vector3.one;
         remainText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "RemainText");
         emptyText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "EmptyText");
         hintInfoText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "HintText");
@@ -1570,12 +1574,19 @@ public partial class SortingGameController : MonoBehaviour
             coinText.text = c.ToString();
             if (lastDisplayedCoinForUi != int.MinValue && c > lastDisplayedCoinForUi)
             {
-                RectTransform chip = coinText.transform.parent as RectTransform;
-                if (chip != null)
+                if (coinChipRect != null)
                 {
-                    chip.DOKill();
-                    chip.DOPunchScale(new Vector3(0.18f, 0.18f, 0f), 0.22f, 5, 0.2f)
-                        .SetUpdate(true);
+                    coinChipRect.DOKill();
+                    coinChipRect.localScale = coinChipBaseScale;
+                    coinChipRect.DOPunchScale(new Vector3(0.18f, 0.18f, 0f), 0.22f, 5, 0.2f)
+                        .SetUpdate(true)
+                        .OnComplete(() =>
+                        {
+                            if (coinChipRect != null)
+                            {
+                                coinChipRect.localScale = coinChipBaseScale;
+                            }
+                        });
                 }
             }
             lastDisplayedCoinForUi = c;
