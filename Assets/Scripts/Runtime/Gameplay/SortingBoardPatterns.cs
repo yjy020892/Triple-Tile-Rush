@@ -146,6 +146,38 @@ public enum SortingBoardPattern
     MidBolt30 = 147,
     MidCup30 = 148,
     MidLeaf30 = 149,
+    GeoDonut24 = 150,
+    GeoChevron24 = 151,
+    GeoMaze27 = 152,
+    GeoOrbit27 = 153,
+    GeoSteps30 = 154,
+    GeoFork30 = 155,
+    GeoBridge30 = 156,
+    GeoClaw30 = 157,
+    GeoClover33 = 158,
+    GeoAnchor33 = 159,
+    GeoFan33 = 160,
+    GeoSpiral33 = 161,
+    GeoComet36 = 162,
+    GeoCage36 = 163,
+    GeoWing36 = 164,
+    GeoTotem36 = 165,
+    GeoCrescent39 = 166,
+    GeoArrowPair39 = 167,
+    GeoTemple39 = 168,
+    GeoRibbon39 = 169,
+    GeoPrism42 = 170,
+    GeoCircuit42 = 171,
+    GeoHarbor42 = 172,
+    GeoLantern42 = 173,
+    GeoNest45 = 174,
+    GeoSwitch45 = 175,
+    GeoPortal45 = 176,
+    GeoTurbine45 = 177,
+    GeoGarden48 = 178,
+    GeoFort48 = 179,
+    GeoGalaxy48 = 180,
+    GeoLabyrinth48 = 181,
 }
 
 public static class SortingBoardPatterns
@@ -1317,6 +1349,316 @@ public static class SortingBoardPatterns
             "XXX.....",
             "XX......",
         },
+        [SortingBoardPattern.GeoDonut24] = new[]
+        {
+            "...XXXX",
+            "XXXXXXX",
+            "XXXXXXX",
+            ".XXXXXX",
+        },
+        [SortingBoardPattern.GeoChevron24] = new[]
+        {
+            ".XXXXX.",
+            "..XXXX.",
+            "XX.XXXX",
+            ".X..XXX",
+            ".XXXXX.",
+        },
+        [SortingBoardPattern.GeoMaze27] = new[]
+        {
+            ".XXXXXX",
+            ".XXXX.X",
+            "X.XX..X",
+            "..XXX.X",
+            "XXXX..X",
+            "X....XX",
+        },
+        [SortingBoardPattern.GeoOrbit27] = new[]
+        {
+            ".XXXXX.",
+            "...X.X.",
+            "X....XX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "...XXX.",
+        },
+        [SortingBoardPattern.GeoSteps30] = new[]
+        {
+            "XX.XXXX",
+            "XXX.XXX",
+            "X..XXXX",
+            "XXXXXXX",
+            "X.X.XXX",
+            "....X..",
+        },
+        [SortingBoardPattern.GeoFork30] = new[]
+        {
+            "X......",
+            "XX...X.",
+            ".XX.XXX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XXXXXXX",
+        },
+        [SortingBoardPattern.GeoBridge30] = new[]
+        {
+            "..X.X..",
+            "XXX....",
+            "XXXX.XX",
+            "XXXXXXX",
+            ".XXXXXX",
+            ".XXXXXX",
+        },
+        [SortingBoardPattern.GeoClaw30] = new[]
+        {
+            ".XX.XXX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XX...XX",
+        },
+        [SortingBoardPattern.GeoClover33] = new[]
+        {
+            "XXX.XXX",
+            ".XXXXXX",
+            ".XXXX..",
+            "..XXX..",
+            "XXXXXXX",
+            "XXXXXXX",
+        },
+        [SortingBoardPattern.GeoAnchor33] = new[]
+        {
+            "..XXX..",
+            "XXXXX.X",
+            "XXXXXX.",
+            ".XXXXX.",
+            ".XXXXX.",
+            ".XXXX..",
+            ".XXXX..",
+        },
+        [SortingBoardPattern.GeoFan33] = new[]
+        {
+            "..XXXXX",
+            "....X..",
+            "..X.X..",
+            "XXX.X..",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XXXXXXX",
+        },
+        [SortingBoardPattern.GeoSpiral33] = new[]
+        {
+            ".XXX.X.",
+            "XX.....",
+            "X....XX",
+            "XX..XXX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "X..XXXX",
+        },
+        [SortingBoardPattern.GeoComet36] = new[]
+        {
+            "...X.X.",
+            "XXXX.XX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XXXXXXX",
+        },
+        [SortingBoardPattern.GeoCage36] = new[]
+        {
+            "XXXXXXX",
+            "XX.X.XX",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XXX.X..",
+            "XXXXXX.",
+        },
+        [SortingBoardPattern.GeoWing36] = new[]
+        {
+            "..XXX..",
+            "..XXX..",
+            "..XXXX.",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XXX.XXX",
+            "XX.XXXX",
+        },
+        [SortingBoardPattern.GeoTotem36] = new[]
+        {
+            ".XXXX..",
+            "XXXXXXX",
+            ".XXXXX.",
+            ".XXXXX.",
+            "XXXXXXX",
+            "XX..XXX",
+            "X....XX",
+        },
+        [SortingBoardPattern.GeoCrescent39] = new[]
+        {
+            "XXXX....",
+            "XXXXXXXX",
+            "XXXXXXXX",
+            ".XXXXXXX",
+            ".XXXXXX.",
+            ".XXXX.X.",
+            ".X......",
+        },
+        [SortingBoardPattern.GeoArrowPair39] = new[]
+        {
+            ".XX..X..",
+            "XX....X.",
+            "XXX.....",
+            "XX.XXXX.",
+            "XXXXXXXX",
+            "XXXXXXXX",
+            "XXXXXXXX",
+        },
+        [SortingBoardPattern.GeoTemple39] = new[]
+        {
+            "X.......",
+            "XXX..XXX",
+            "XXXX..X.",
+            "XXXXXXXX",
+            "XXXXXX.X",
+            "XXXXX.XX",
+            ".XXXXX..",
+        },
+        [SortingBoardPattern.GeoRibbon39] = new[]
+        {
+            ".......X",
+            "XX....XX",
+            "XX.XX.XX",
+            "XXXXXXXX",
+            "XXXXXXX.",
+            "XXX.XXXX",
+            "XXX..XXX",
+        },
+        [SortingBoardPattern.GeoPrism42] = new[]
+        {
+            "..X.XX..",
+            ".XXXXX..",
+            ".XXXXXX.",
+            "XXXXXXXX",
+            "XXXXX.XX",
+            "XXXXX.X.",
+            "X.XXXXXX",
+        },
+        [SortingBoardPattern.GeoCircuit42] = new[]
+        {
+            ".X....XX",
+            "XX...X.X",
+            "X...XXXX",
+            "XXXXXXXX",
+            "XXXXXXXX",
+            "XXXXXXXX",
+            "XXX..XXX",
+        },
+        [SortingBoardPattern.GeoHarbor42] = new[]
+        {
+            ".X....X.",
+            ".X....X.",
+            ".X.XXXX.",
+            "XXXXX.XX",
+            "X.XXXXX.",
+            "XXXXXXXX",
+            "..XXXXX.",
+            ".XXXXXXX",
+        },
+        [SortingBoardPattern.GeoLantern42] = new[]
+        {
+            "...XX...",
+            "...XX..X",
+            "...XXXXX",
+            "...XXXXX",
+            "XXXXXXXX",
+            "XXXXXX.X",
+            "XXXXXX..",
+            ".XX.XXXX",
+        },
+        [SortingBoardPattern.GeoNest45] = new[]
+        {
+            ".XXXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXX.",
+            "XXXXXX.XX",
+            ".XXXX.XXX",
+            "..XX....X",
+            "...XXX...",
+            "...XXX...",
+        },
+        [SortingBoardPattern.GeoSwitch45] = new[]
+        {
+            "X..XXXX.",
+            "XXXXXXX.",
+            ".XXXXXX.",
+            ".XXXXXXX",
+            ".XXXXXXX",
+            "XXXXXXX.",
+            ".XXXXXX.",
+        },
+        [SortingBoardPattern.GeoPortal45] = new[]
+        {
+            "..XXXXX..",
+            ".XX..XXX.",
+            ".X..X.XX.",
+            "...XXXXX.",
+            "..XXXXXXX",
+            "X..XXXXXX",
+            "X.XXXXXXX",
+            "...XXX..X",
+        },
+        [SortingBoardPattern.GeoTurbine45] = new[]
+        {
+            "XXX.XXXXX",
+            "XX.....XX",
+            "XXXXX.XXX",
+            "XXXXXXXXX",
+            "XX..XXXXX",
+            "XXXXXXXXX",
+        },
+        [SortingBoardPattern.GeoGarden48] = new[]
+        {
+            ".X....XXX",
+            "XXXX.XXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXX.X",
+            ".XXXXXXX.",
+            ".X.....XX",
+        },
+        [SortingBoardPattern.GeoFort48] = new[]
+        {
+            "....XXX..",
+            "....XX...",
+            "....XXX..",
+            "XXXXX.XXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            ".XXXXXXX.",
+        },
+        [SortingBoardPattern.GeoGalaxy48] = new[]
+        {
+            ".X.....X.",
+            "XXXX...X.",
+            "...XXXX..",
+            "..XXXXX..",
+            "XXXXXXXXX",
+            "XXXXX..XX",
+            "XXXXXX.XX",
+            "XXXXX.XXX",
+        },
+        [SortingBoardPattern.GeoLabyrinth48] = new[]
+        {
+            ".....X...",
+            "..X.XX...",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXX.XXXX",
+        },
         [SortingBoardPattern.LayerLine3] = new[]
         {
             "XXX",
@@ -1545,15 +1887,17 @@ public static class SortingBoardPatterns
         float sourceCenterX = (sourceCols - 1) * 0.5f;
         float sourceCenterY = (sourceRows - 1) * 0.5f;
 
-        var cells = new List<(int x, int y, float dist, float tie)>((sourceCols - 1) * (sourceRows - 1));
+        var cells = new List<(int x, int y, float dist, float tie, int support)>((sourceCols - 1) * (sourceRows - 1));
         for (int r = 0; r < sourceRows - 1; r++)
         {
             for (int c = 0; c < sourceCols - 1; c++)
             {
-                if (!HasCell(rows, c, r)
-                    || !HasCell(rows, c + 1, r)
-                    || !HasCell(rows, c, r + 1)
-                    || !HasCell(rows, c + 1, r + 1))
+                int support = 0;
+                if (HasCell(rows, c, r)) support++;
+                if (HasCell(rows, c + 1, r)) support++;
+                if (HasCell(rows, c, r + 1)) support++;
+                if (HasCell(rows, c + 1, r + 1)) support++;
+                if (support < 2)
                 {
                     continue;
                 }
@@ -1562,15 +1906,16 @@ public static class SortingBoardPatterns
                 float y = r + 0.5f;
                 float dx = x - sourceCenterX;
                 float dy = y - sourceCenterY;
-                float dist = dx * dx + dy * dy;
+                float dist = dx * dx + dy * dy + (4 - support) * 1.15f;
                 float tie = Mathf.Abs(dx) + Mathf.Abs(dy) * 0.37f + variant * 0.013f;
-                cells.Add((c, r, dist, tie));
+                cells.Add((c, r, dist, tie, support));
             }
         }
 
-        if (cells.Count == 0)
+        int desiredTake = NormalizeNestedCount(targetCount);
+        if (cells.Count == 0 || cells.Count < desiredTake)
         {
-            return string.Empty;
+            return BuildFallbackNestedGrid(rows, targetCount);
         }
 
         cells.Sort((a, b) =>
@@ -1589,6 +1934,8 @@ public static class SortingBoardPatterns
         {
             return string.Empty;
         }
+
+        cells = ExpandNestedSelection(cells, take);
 
         int width = Mathf.Max(1, sourceCols - 1);
         int height = Mathf.Max(1, sourceRows - 1);
@@ -1628,6 +1975,165 @@ public static class SortingBoardPatterns
 
         int normalized = count - count % 3;
         return Mathf.Max(3, normalized);
+    }
+
+    private static List<(int x, int y, float dist, float tie, int support)> ExpandNestedSelection(
+        List<(int x, int y, float dist, float tie, int support)> sortedCells,
+        int take)
+    {
+        if (sortedCells == null || sortedCells.Count <= take)
+        {
+            return sortedCells;
+        }
+
+        var result = new List<(int x, int y, float dist, float tie, int support)>(take);
+        var selected = new HashSet<Vector2Int>();
+        int seedCount = Mathf.Max(1, take / 2);
+        for (int i = 0; i < sortedCells.Count && result.Count < seedCount; i++)
+        {
+            AddNestedCell(sortedCells[i], result, selected);
+        }
+
+        while (result.Count < take)
+        {
+            int bestIndex = -1;
+            float bestScore = float.MaxValue;
+            for (int i = 0; i < sortedCells.Count; i++)
+            {
+                var cell = sortedCells[i];
+                if (selected.Contains(new Vector2Int(cell.x, cell.y)))
+                {
+                    continue;
+                }
+
+                int neighbors = CountSelectedNeighbors(cell.x, cell.y, selected);
+                float score = cell.dist - neighbors * 2.6f + (4 - cell.support) * 0.55f + cell.tie * 0.15f;
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestIndex = i;
+                }
+            }
+
+            if (bestIndex < 0)
+            {
+                break;
+            }
+
+            AddNestedCell(sortedCells[bestIndex], result, selected);
+        }
+
+        return result;
+    }
+
+    private static void AddNestedCell(
+        (int x, int y, float dist, float tie, int support) cell,
+        List<(int x, int y, float dist, float tie, int support)> result,
+        HashSet<Vector2Int> selected)
+    {
+        var key = new Vector2Int(cell.x, cell.y);
+        if (selected.Add(key))
+        {
+            result.Add(cell);
+        }
+    }
+
+    private static int CountSelectedNeighbors(int x, int y, HashSet<Vector2Int> selected)
+    {
+        if (selected == null || selected.Count == 0)
+        {
+            return 0;
+        }
+
+        int count = 0;
+        if (selected.Contains(new Vector2Int(x - 1, y))) count++;
+        if (selected.Contains(new Vector2Int(x + 1, y))) count++;
+        if (selected.Contains(new Vector2Int(x, y - 1))) count++;
+        if (selected.Contains(new Vector2Int(x, y + 1))) count++;
+        return count;
+    }
+
+    private static string BuildFallbackNestedGrid(string[] rows, int targetCount)
+    {
+        int sourceRows = rows != null ? rows.Length : 0;
+        if (sourceRows <= 0)
+        {
+            return string.Empty;
+        }
+
+        int sourceCols = 0;
+        for (int r = 0; r < sourceRows; r++)
+        {
+            if (rows[r].Length > sourceCols) sourceCols = rows[r].Length;
+        }
+
+        if (sourceCols <= 0)
+        {
+            return string.Empty;
+        }
+
+        float sourceCenterX = (sourceCols - 1) * 0.5f;
+        float sourceCenterY = (sourceRows - 1) * 0.5f;
+        var cells = new List<(int x, int y, float dist)>();
+        for (int r = 0; r < sourceRows; r++)
+        {
+            for (int c = 0; c < rows[r].Length; c++)
+            {
+                if (rows[r][c] != 'X')
+                {
+                    continue;
+                }
+
+                float dx = c - sourceCenterX;
+                float dy = r - sourceCenterY;
+                cells.Add((c, r, dx * dx + dy * dy));
+            }
+        }
+
+        if (cells.Count < 3)
+        {
+            return string.Empty;
+        }
+
+        int sourceCount = cells.Count;
+        if (sourceCols <= 2 || sourceRows <= 2)
+        {
+            targetCount = Mathf.Min(targetCount, NormalizeNestedCount(Mathf.Max(3, sourceCount / 2)));
+        }
+
+        cells.Sort((a, b) =>
+        {
+            int cmp = a.dist.CompareTo(b.dist);
+            if (cmp != 0) return cmp;
+            cmp = a.y.CompareTo(b.y);
+            if (cmp != 0) return cmp;
+            return a.x.CompareTo(b.x);
+        });
+
+        int take = NormalizeNestedCount(Mathf.Clamp(targetCount, 3, cells.Count));
+        if (take <= 0)
+        {
+            return string.Empty;
+        }
+
+        char[][] output = new char[sourceRows][];
+        for (int r = 0; r < sourceRows; r++)
+        {
+            output[r] = new string('.', sourceCols).ToCharArray();
+        }
+
+        for (int i = 0; i < take; i++)
+        {
+            output[cells[i].y][cells[i].x] = 'X';
+        }
+
+        var packed = new List<string>(sourceRows);
+        for (int r = 0; r < sourceRows; r++)
+        {
+            packed.Add(new string(output[r]));
+        }
+
+        return string.Join("/", packed);
     }
 
     private static bool HasCell(string[] rows, int x, int y)
