@@ -76,6 +76,36 @@ public enum SortingBoardPattern
     LayerDiagonal6 = 70,
     LayerStagger9 = 71,
     LayerOffset12 = 72,
+    SmallPlus15 = 80,
+    SmallT18 = 81,
+    SmallL18 = 82,
+    SmallU18 = 83,
+    SmallH21 = 84,
+    SmallC18 = 85,
+    SmallZ18 = 86,
+    SmallS18 = 87,
+    SmallV15 = 88,
+    SmallX21 = 89,
+    SmallFrame18 = 90,
+    SmallCorners12 = 91,
+    SmallBridge18 = 92,
+    SmallSteps18 = 93,
+    SmallBolt15 = 94,
+    SmallCup18 = 95,
+    SmallSnake21 = 96,
+    SmallKey18 = 97,
+    SmallMoon18 = 98,
+    SmallFish18 = 99,
+    SmallHouse21 = 100,
+    SmallCrown18 = 101,
+    SmallWaves18 = 102,
+    SmallGate18 = 103,
+    SmallHook15 = 104,
+    SmallPinwheel24 = 105,
+    SmallSpiral24 = 106,
+    SmallMushroom18 = 107,
+    SmallBoat18 = 108,
+    SmallLeaf18 = 109,
 }
 
 public static class SortingBoardPatterns
@@ -665,6 +695,267 @@ public static class SortingBoardPatterns
             "XX..XX",
             "XX..XX",
             "XXXXXX",
+        },
+        [SortingBoardPattern.SmallPlus15] = new[]
+        {
+            "..X..",
+            "..X..",
+            "XXXXX",
+            "XXXXX",
+            "..X..",
+            "..XX.",
+        },
+        [SortingBoardPattern.SmallT18] = new[]
+        {
+            "XXXXXX",
+            "XXXXXX",
+            ".XXX..",
+            ".XXX..",
+            "..XX..",
+            "..XX..",
+            "..XX..",
+        },
+        [SortingBoardPattern.SmallL18] = new[]
+        {
+            "XX....",
+            "XX....",
+            "XXX...",
+            "XXX...",
+            "XX....",
+            "XXXXXX",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.SmallU18] = new[]
+        {
+            "XXX.XX",
+            "XXX.XX",
+            "XX..XX",
+            "XX..XX",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.SmallH21] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            "XXXXXX",
+            "XXXXXX",
+            "XX..XX",
+            "XX..XX",
+            "XXX.XX",
+        },
+        [SortingBoardPattern.SmallC18] = new[]
+        {
+            "XXXXXX",
+            "XXXXXX",
+            "XX....",
+            "XX....",
+            "XX....",
+            "XXXXXX",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.SmallZ18] = new[]
+        {
+            "XXXXXX",
+            "XXXXXX",
+            "...XX.",
+            "..XX..",
+            ".XX...",
+            "XXXXXX",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.SmallS18] = new[]
+        {
+            ".XXXXX",
+            "XXXXXX",
+            "XX....",
+            ".XXXX.",
+            "....XX",
+            "XXXXXX",
+            "XXXXX.",
+        },
+        [SortingBoardPattern.SmallV15] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            ".XXXX.",
+            ".XXXX.",
+            "..XX..",
+            ".....",
+        },
+        [SortingBoardPattern.SmallX21] = new[]
+        {
+            "XX..XX",
+            ".XXXX.",
+            ".XXXX.",
+            ".XXXX.",
+            "XX..XX",
+            "XX..XX",
+        },
+        [SortingBoardPattern.SmallFrame18] = new[]
+        {
+            "XXXXXX",
+            "X...XX",
+            "XX...X",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.SmallCorners12] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            "......",
+            "XX..XX",
+            "......",
+        },
+        [SortingBoardPattern.SmallBridge18] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            "XXXXXX",
+            "XXXXXX",
+            "XX..XX",
+        },
+        [SortingBoardPattern.SmallSteps18] = new[]
+        {
+            "XX....",
+            "XX....",
+            "XXXX..",
+            "XXXX..",
+            "..XXXX",
+            "..XX..",
+        },
+        [SortingBoardPattern.SmallBolt15] = new[]
+        {
+            "..XXX.",
+            ".XXX..",
+            ".XXXX.",
+            "..XXX.",
+            ".XX...",
+        },
+        [SortingBoardPattern.SmallCup18] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            "XX..XX",
+            "XXXXXX",
+            ".XXXX.",
+            "..XX..",
+        },
+        [SortingBoardPattern.SmallSnake21] = new[]
+        {
+            "XXXXXX",
+            "XX....",
+            "XXXXXX",
+            "....XX",
+            "XXXXX.",
+        },
+        [SortingBoardPattern.SmallKey18] = new[]
+        {
+            ".XXXX.",
+            "XX..XX",
+            ".XXXX.",
+            "..XX..",
+            "..XXXX",
+            "..XXX.",
+        },
+        [SortingBoardPattern.SmallMoon18] = new[]
+        {
+            "..XXXX",
+            ".XXXX.",
+            "XXXX..",
+            "XXXX..",
+            ".XXXX.",
+            "..XXXX",
+        },
+        [SortingBoardPattern.SmallFish18] = new[]
+        {
+            ".XXXX.",
+            "XXXXXX",
+            "XXXXX.",
+            ".XXXX.",
+            "X....X",
+        },
+        [SortingBoardPattern.SmallHouse21] = new[]
+        {
+            "..XX..",
+            ".XXXX.",
+            "XXXXXX",
+            "XXXXX.",
+            "XX..XX",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.SmallCrown18] = new[]
+        {
+            "X....X",
+            "XXXXXX",
+            "XXXXXX",
+            ".XXXX.",
+        },
+        [SortingBoardPattern.SmallWaves18] = new[]
+        {
+            "XXX...",
+            "XXXXX.",
+            ".XXXXX",
+            "...XXX",
+            ".XXXXX",
+        },
+        [SortingBoardPattern.SmallGate18] = new[]
+        {
+            "XXXXXX",
+            "XXX.XX",
+            "XX.XXX",
+            "XX..XX",
+            "XX..XX",
+        },
+        [SortingBoardPattern.SmallHook15] = new[]
+        {
+            "XXXX.",
+            "XXX..",
+            "..XX.",
+            "..XX.",
+            "XXXX.",
+        },
+        [SortingBoardPattern.SmallPinwheel24] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            "XXXXXX",
+            "XX..XX",
+            "XX..XX",
+            "..XX..",
+        },
+        [SortingBoardPattern.SmallSpiral24] = new[]
+        {
+            "XXXXXX",
+            "XX....",
+            "XXXXXX",
+            "....XX",
+            "XXXXXX",
+            "XX....",
+        },
+        [SortingBoardPattern.SmallMushroom18] = new[]
+        {
+            ".XXXX.",
+            "XXXXXX",
+            "XXXXXX",
+            "..XX..",
+            "..XX..",
+            ".XXXX.",
+        },
+        [SortingBoardPattern.SmallBoat18] = new[]
+        {
+            "..XX..",
+            ".XXXX.",
+            "XXXXXX",
+            "XXXXX.",
+            ".XXXX.",
+        },
+        [SortingBoardPattern.SmallLeaf18] = new[]
+        {
+            "...XX.",
+            "..XXXX",
+            ".XXXX.",
+            ".XXXX.",
+            "XXXX..",
         },
         [SortingBoardPattern.LayerLine3] = new[]
         {

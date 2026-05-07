@@ -270,6 +270,25 @@ public class SortingItemView : MonoBehaviour, IPointerClickHandler
             return null;
         }
 
+        SortingTheme theme = SortingItemCatalog.GetTheme(type);
+        int iconIndex = SortingItemCatalog.GetThemeIconIndex(type);
+        if (iconIndex > 0)
+        {
+            string themeName = theme.ToString();
+            string fileName = $"tileicon_{themeName.ToLowerInvariant()}{iconIndex}";
+            Sprite themedIcon = Resources.Load<Sprite>($"TileIcons/{themeName}/{fileName}");
+            if (themedIcon != null)
+            {
+                return themedIcon;
+            }
+
+            themedIcon = Resources.Load<Sprite>($"TileIcons/{themeName.ToLowerInvariant()}/{fileName}");
+            if (themedIcon != null)
+            {
+                return themedIcon;
+            }
+        }
+
         Sprite icon = Resources.Load<Sprite>($"TileIcons/{type}");
         if (icon != null)
         {

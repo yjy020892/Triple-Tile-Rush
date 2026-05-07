@@ -33,6 +33,18 @@ public static class SortingItemCatalog
         return def != null ? def.theme : SortingTheme.Food;
     }
 
+    public static int GetThemeIconIndex(SortingItemType type)
+    {
+        SortingItemDef def = Get(type);
+        if (def == null || !byTheme.TryGetValue(def.theme, out List<SortingItemType> list))
+        {
+            return 0;
+        }
+
+        int index = list.IndexOf(type);
+        return index >= 0 ? index + 1 : 0;
+    }
+
     public static int ThemeCount => byTheme.Count;
 
     private static Dictionary<SortingItemType, SortingItemDef> BuildTable()
@@ -153,6 +165,12 @@ public static class SortingItemCatalog
             }
             list.Add(pair.Key);
         }
+
+        foreach (List<SortingItemType> list in map.Values)
+        {
+            list.Sort((a, b) => ((int)a).CompareTo((int)b));
+        }
+
         return map;
     }
 
