@@ -27,3 +27,4 @@
 
 # Keystores should be managed explicitly, not committed by accident.
 *.keystore
+.vs/TripleTileRush/FileContentIndex/793d63f3-89f4-4d46-9251-8d6a8fa5f0cc.vsidx
