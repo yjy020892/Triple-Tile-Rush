@@ -32,7 +32,7 @@ public static class SortingLevelGenerator
         {
             def.typeCount       = Mathf.Max(3, def.typeCount - 1);
             def.setsPerType     = Mathf.Max(1, def.setsPerType - 1);
-            def.layerCount      = Mathf.Max(1, def.layerCount - 1);
+            def.layerCount      = level <= 2 ? 1 : Mathf.Max(2, def.layerCount - 1);
             def.threeStarSeconds += 25;
             def.twoStarSeconds  += 50;
             def.clearCoinReward += 5;
@@ -59,17 +59,17 @@ public static class SortingLevelGenerator
             def.twoStarSeconds   = 0;
             def.clearCoinReward  = 30;
         }
-        else if (level <= 3)
+        else if (level == 2)
         {
-            def.typeCount = 4; def.setsPerType = 1; def.layerCount = 1;
-            def.threeStarSeconds = 70; def.twoStarSeconds = 140;
+            def.typeCount = 3; def.setsPerType = 1; def.layerCount = 1;
+            def.threeStarSeconds = 60; def.twoStarSeconds = 120;
             def.clearCoinReward  = 28;
         }
         else if (level <= 8)
         {
-            def.typeCount = 5; def.setsPerType = 1; def.layerCount = 1;
-            def.threeStarSeconds = 60; def.twoStarSeconds = 120;
-            def.clearCoinReward  = 28;
+            def.typeCount = level <= 5 ? 3 : 4; def.setsPerType = 1; def.layerCount = 2;
+            def.threeStarSeconds = 70 + level * 4; def.twoStarSeconds = 140 + level * 8;
+            def.clearCoinReward  = 30 + level;
         }
         else if (level <= 14)
         {
@@ -129,9 +129,9 @@ public static class SortingLevelGenerator
         }
         else
         {
-            def.typeCount        = 8;
+            def.typeCount        = Mathf.Min(10, 8 + (level - 100) / 100);
             def.setsPerType      = 4;
-            def.layerCount       = 4;
+            def.layerCount       = 3;
             def.threeStarSeconds = 150; def.twoStarSeconds = 280;
             def.clearCoinReward  = 100 + (level - 100) / 5 * 5;
             def.allowExtraSlot   = false;
@@ -149,7 +149,7 @@ public static class SortingLevelGenerator
 
     private static SortingTheme PickTheme(int level, bool isMilestone)
     {
-        if (level <= 8) return SortingTheme.Food;
+        if (level <= 2) return SortingTheme.Food;
 
         if (isMilestone && level <= 80) return SortingTheme.Fantasy;
 
@@ -164,24 +164,25 @@ public static class SortingLevelGenerator
             SortingTheme.Weather,
             SortingTheme.Tool,
         };
-        return rotation[(level - 9) % rotation.Length];
+        return rotation[(level - 3) % rotation.Length];
     }
 
     private static SortingBoardPattern PickPattern(int level, bool isRest, bool isMilestone)
     {
-        if (level <= 3 || isRest) return SortingBoardPattern.Grid;
+        if (level <= 2) return level == 1 ? SortingBoardPattern.Grid : SortingBoardPattern.MiniBar12;
 
         if (level <= 8)
         {
             SortingBoardPattern[] earlyPool =
             {
-                SortingBoardPattern.SmallBlock15,      // L4
-                SortingBoardPattern.SmallDiamond21,    // L5
-                SortingBoardPattern.SmallPyramid21,    // L6
-                SortingBoardPattern.SmallTwoColumns24, // L7
-                SortingBoardPattern.SmallArrow15,      // L8
+                SortingBoardPattern.MiniBar12,
+                SortingBoardPattern.MiniStack12,
+                SortingBoardPattern.MiniStair12,
+                SortingBoardPattern.MiniSplit12,
+                SortingBoardPattern.MiniArrow12,
+                SortingBoardPattern.MiniDiamond15,
             };
-            return PickPatternFromPool(earlyPool, level - 4);
+            return PickPatternFromPool(earlyPool, level - 3);
         }
 
         if (isMilestone)
@@ -216,7 +217,7 @@ public static class SortingLevelGenerator
         def.layerLayouts.Clear();
         SortingBoardPattern basePattern = PickPattern(level, isRest, isMilestone);
         def.boardPattern = basePattern;
-        if (basePattern == SortingBoardPattern.Grid)
+        if (level <= 2 || basePattern == SortingBoardPattern.Grid)
         {
             return;
         }
@@ -265,9 +266,8 @@ public static class SortingLevelGenerator
 
     private static bool ShouldAddSecondLayer(int level, bool isRest, bool isMilestone)
     {
-        if (isRest || level < 7) return false;
-        if (isMilestone && level < 40) return false;
-        if (level <= 12) return level % 2 == 1;
+        if (level < 3) return false;
+        if (level <= 12) return true;
         if (level <= 20) return level % 3 != 1;
         if (level <= 35) return level % 4 != 1;
         return !isMilestone || level >= 40;
@@ -302,26 +302,42 @@ public static class SortingLevelGenerator
     {
         if (level <= 15) return new[]
         {
+            SortingBoardPattern.MiniBar12,        SortingBoardPattern.MiniStack12,
+            SortingBoardPattern.MiniStair12,      SortingBoardPattern.MiniCorner12,
+            SortingBoardPattern.MiniSplit12,      SortingBoardPattern.MiniZig12,
+            SortingBoardPattern.MiniGate15,       SortingBoardPattern.MiniCup15,
+            SortingBoardPattern.MiniArrow12,      SortingBoardPattern.MiniDiamond15,
+            SortingBoardPattern.MiniCross15,      SortingBoardPattern.MiniWave15,
             SortingBoardPattern.SmallBlock15,      SortingBoardPattern.SmallDiamond21,
             SortingBoardPattern.SmallPyramid21,    SortingBoardPattern.SmallTwoColumns24,
             SortingBoardPattern.SmallArrow15,      SortingBoardPattern.SmallRing24,
-            SortingBoardPattern.Plus,              SortingBoardPattern.TwoRows,
         };
 
         if (level <= 30) return new[]
         {
+            SortingBoardPattern.MiniHook12,  SortingBoardPattern.MiniBridge15,
+            SortingBoardPattern.MiniCrown15, SortingBoardPattern.MiniH15,
+            SortingBoardPattern.MiniU15,     SortingBoardPattern.MiniT15,
+            SortingBoardPattern.MiniS15,     SortingBoardPattern.MiniV12,
+            SortingBoardPattern.SmallPlus15, SortingBoardPattern.SmallT18,
+            SortingBoardPattern.SmallL18,    SortingBoardPattern.SmallU18,
+            SortingBoardPattern.SmallH21,    SortingBoardPattern.SmallC18,
+            SortingBoardPattern.SmallZ18,    SortingBoardPattern.SmallS18,
             SortingBoardPattern.FourCorners, SortingBoardPattern.ArrowUp,
             SortingBoardPattern.TShape,      SortingBoardPattern.LShape,
             SortingBoardPattern.Hourglass,   SortingBoardPattern.Bowtie,
-            SortingBoardPattern.ArrowDown,   SortingBoardPattern.Shield,
-            SortingBoardPattern.Droplet,     SortingBoardPattern.ArrowRight,
-            SortingBoardPattern.Stairs,      SortingBoardPattern.Vase,
-            SortingBoardPattern.TwoRows,     SortingBoardPattern.Diamond,
-            SortingBoardPattern.Plus,        SortingBoardPattern.Circle,
         };
 
         if (level <= 50) return new[]
         {
+            SortingBoardPattern.SmallV15,     SortingBoardPattern.SmallX21,
+            SortingBoardPattern.SmallFrame18, SortingBoardPattern.SmallCorners12,
+            SortingBoardPattern.SmallBridge18,SortingBoardPattern.SmallSteps18,
+            SortingBoardPattern.SmallBolt15,  SortingBoardPattern.SmallCup18,
+            SortingBoardPattern.SmallSnake21, SortingBoardPattern.SmallKey18,
+            SortingBoardPattern.SmallMoon18,  SortingBoardPattern.SmallFish18,
+            SortingBoardPattern.SmallHouse21, SortingBoardPattern.SmallCrown18,
+            SortingBoardPattern.SmallWaves18, SortingBoardPattern.SmallGate18,
             SortingBoardPattern.Star,        SortingBoardPattern.Umbrella,
             SortingBoardPattern.Butterfly,   SortingBoardPattern.ZigZag,
             SortingBoardPattern.LetterH,     SortingBoardPattern.LetterU,
@@ -336,6 +352,12 @@ public static class SortingLevelGenerator
 
         if (level <= 70) return new[]
         {
+            SortingBoardPattern.SmallHook15,      SortingBoardPattern.SmallPinwheel24,
+            SortingBoardPattern.SmallSpiral24,    SortingBoardPattern.SmallMushroom18,
+            SortingBoardPattern.SmallBoat18,      SortingBoardPattern.SmallLeaf18,
+            SortingBoardPattern.MidPlus27,        SortingBoardPattern.MidPyramid30,
+            SortingBoardPattern.MidRing30,        SortingBoardPattern.MidArrow30,
+            SortingBoardPattern.MidColumns30,     SortingBoardPattern.MidRows30,
             SortingBoardPattern.LetterS,     SortingBoardPattern.LetterZ,
             SortingBoardPattern.Snowflake,   SortingBoardPattern.Pentagon,
             SortingBoardPattern.Wave,        SortingBoardPattern.Cross,
@@ -350,6 +372,13 @@ public static class SortingLevelGenerator
 
         return new[]
         {
+            SortingBoardPattern.MidDiamond33, SortingBoardPattern.MidHeart33,
+            SortingBoardPattern.MidTwoRooms30,SortingBoardPattern.MidSpiral33,
+            SortingBoardPattern.MidCastle33,  SortingBoardPattern.MidFlower30,
+            SortingBoardPattern.MidShield33,  SortingBoardPattern.MidCrown30,
+            SortingBoardPattern.MidStairs30,  SortingBoardPattern.MidSnake30,
+            SortingBoardPattern.MidGate30,    SortingBoardPattern.MidBolt30,
+            SortingBoardPattern.MidCup30,     SortingBoardPattern.MidLeaf30,
             SortingBoardPattern.BigCircle,   SortingBoardPattern.BigDiamond,
             SortingBoardPattern.Cross,       SortingBoardPattern.ThreeStripes,
             SortingBoardPattern.Wave,        SortingBoardPattern.Pentagon,

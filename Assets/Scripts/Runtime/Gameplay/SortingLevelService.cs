@@ -106,6 +106,14 @@ public static class SortingLevelService
         {
             targetTileCount = typeCount * setsPerType * 3;
         }
+        else
+        {
+            targetTileCount -= targetTileCount % 3;
+            if (targetTileCount <= 0)
+            {
+                targetTileCount = typeCount * setsPerType * 3;
+            }
+        }
 
         int typeIndex = 0;
         while (items.Count < targetTileCount && selectedTypes.Count > 0)

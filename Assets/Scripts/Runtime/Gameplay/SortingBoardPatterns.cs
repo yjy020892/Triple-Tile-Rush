@@ -106,6 +106,46 @@ public enum SortingBoardPattern
     SmallMushroom18 = 107,
     SmallBoat18 = 108,
     SmallLeaf18 = 109,
+    MiniBar12 = 110,
+    MiniStack12 = 111,
+    MiniStair12 = 112,
+    MiniCorner12 = 113,
+    MiniSplit12 = 114,
+    MiniZig12 = 115,
+    MiniGate15 = 116,
+    MiniCup15 = 117,
+    MiniArrow12 = 118,
+    MiniDiamond15 = 119,
+    MiniCross15 = 120,
+    MiniWave15 = 121,
+    MiniHook12 = 122,
+    MiniBridge15 = 123,
+    MiniCrown15 = 124,
+    MiniH15 = 125,
+    MiniU15 = 126,
+    MiniT15 = 127,
+    MiniS15 = 128,
+    MiniV12 = 129,
+    MidRing30 = 130,
+    MidPlus27 = 131,
+    MidPyramid30 = 132,
+    MidDiamond33 = 133,
+    MidHeart33 = 134,
+    MidArrow30 = 135,
+    MidTwoRooms30 = 136,
+    MidColumns30 = 137,
+    MidRows30 = 138,
+    MidSpiral33 = 139,
+    MidCastle33 = 140,
+    MidFlower30 = 141,
+    MidShield33 = 142,
+    MidCrown30 = 143,
+    MidStairs30 = 144,
+    MidSnake30 = 145,
+    MidGate30 = 146,
+    MidBolt30 = 147,
+    MidCup30 = 148,
+    MidLeaf30 = 149,
 }
 
 public static class SortingBoardPatterns
@@ -957,6 +997,326 @@ public static class SortingBoardPatterns
             ".XXXX.",
             "XXXX..",
         },
+        [SortingBoardPattern.MiniBar12] = new[]
+        {
+            "XXXXXX",
+            "XXXXXX",
+        },
+        [SortingBoardPattern.MiniStack12] = new[]
+        {
+            "XX",
+            "XX",
+            "XX",
+            "XX",
+            "XX",
+            "XX",
+        },
+        [SortingBoardPattern.MiniStair12] = new[]
+        {
+            "XX..",
+            "XX..",
+            "XXXX",
+            "..XX",
+            "..XX",
+        },
+        [SortingBoardPattern.MiniCorner12] = new[]
+        {
+            "XXXX",
+            "XXXX",
+            "XX..",
+            "XX..",
+        },
+        [SortingBoardPattern.MiniSplit12] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            "XX..XX",
+        },
+        [SortingBoardPattern.MiniZig12] = new[]
+        {
+            "XXXX..",
+            "..XXXX",
+            "XXXX..",
+        },
+        [SortingBoardPattern.MiniGate15] = new[]
+        {
+            "XXXXX",
+            "X...X",
+            "XX.XX",
+            "XX.XX",
+        },
+        [SortingBoardPattern.MiniCup15] = new[]
+        {
+            "X...X",
+            "XX.XX",
+            "XXXXX",
+            ".XXXX",
+        },
+        [SortingBoardPattern.MiniArrow12] = new[]
+        {
+            "..XX.",
+            ".XXXX",
+            "XXXXX",
+            "..X..",
+        },
+        [SortingBoardPattern.MiniDiamond15] = new[]
+        {
+            "..X..",
+            ".XXX.",
+            "XXXXX",
+            ".XXX.",
+            "..XXX",
+        },
+        [SortingBoardPattern.MiniCross15] = new[]
+        {
+            ".XXX.",
+            ".XXX.",
+            "XXXXX",
+            ".XXX.",
+            ".X...",
+        },
+        [SortingBoardPattern.MiniWave15] = new[]
+        {
+            "XXX...",
+            "XXXXX.",
+            "..XXXX",
+            "...XXX",
+        },
+        [SortingBoardPattern.MiniHook12] = new[]
+        {
+            "XXXX",
+            "XX..",
+            "XX..",
+            "XXXX",
+        },
+        [SortingBoardPattern.MiniBridge15] = new[]
+        {
+            "XX..XX",
+            "XX..XX",
+            "XXXXXX",
+            ".X....",
+        },
+        [SortingBoardPattern.MiniCrown15] = new[]
+        {
+            "X...X",
+            "XXXXX",
+            "XXXXX",
+            ".XXX.",
+        },
+        [SortingBoardPattern.MiniH15] = new[]
+        {
+            "XX.XX",
+            "XX.XX",
+            ".XXX.",
+            "XX.XX",
+        },
+        [SortingBoardPattern.MiniU15] = new[]
+        {
+            "X...X",
+            "XX.XX",
+            "XX.XX",
+            "XXXXX",
+        },
+        [SortingBoardPattern.MiniT15] = new[]
+        {
+            "XXXXX",
+            "XXXXX",
+            ".XXX.",
+            ".XX..",
+        },
+        [SortingBoardPattern.MiniS15] = new[]
+        {
+            "XXXXX",
+            "XX...",
+            "XXXXX",
+            "...XX",
+            "X....",
+        },
+        [SortingBoardPattern.MiniV12] = new[]
+        {
+            "XX..XX",
+            ".XXXX.",
+            ".XXXX.",
+        },
+        [SortingBoardPattern.MidRing30] = new[]
+        {
+            "XXXXXXXX",
+            "XXXXXXXX",
+            "XX....XX",
+            "XX....XX",
+            ".XXXXXX.",
+        },
+        [SortingBoardPattern.MidPlus27] = new[]
+        {
+            "..XXX..",
+            "..XXX..",
+            "XXXXXXX",
+            "XXXXXXX",
+            "..XXX..",
+            "..XXXX.",
+        },
+        [SortingBoardPattern.MidPyramid30] = new[]
+        {
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "XXXXXX...",
+        },
+        [SortingBoardPattern.MidDiamond33] = new[]
+        {
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            ".XXXXXX..",
+            "...XXX...",
+        },
+        [SortingBoardPattern.MidHeart33] = new[]
+        {
+            ".XXX.XXX.",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            ".XXXXXXX.",
+            "...XX....",
+        },
+        [SortingBoardPattern.MidArrow30] = new[]
+        {
+            "...XXX...",
+            "...XXX...",
+            "..XXXXX..",
+            ".XXXXXXX.",
+            "XXXXXXXXX",
+            "...XXX...",
+        },
+        [SortingBoardPattern.MidTwoRooms30] = new[]
+        {
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+            "XXX...XXX",
+        },
+        [SortingBoardPattern.MidColumns30] = new[]
+        {
+            "XXX..XXX",
+            "XXX..XXX",
+            "XXX..XXX",
+            "XXX..XXX",
+            "XXX..XXX",
+        },
+        [SortingBoardPattern.MidRows30] = new[]
+        {
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "XXXXXXXXX",
+            "...XXX...",
+        },
+        [SortingBoardPattern.MidSpiral33] = new[]
+        {
+            "XXXXXXXX",
+            "XX......",
+            "XXXXXXX.",
+            ".....XX.",
+            "XXXXXXXX",
+            "XX......",
+            "XXXX....",
+        },
+        [SortingBoardPattern.MidCastle33] = new[]
+        {
+            "X.X.X.X",
+            "XXXXXXX",
+            "XXXXXXX",
+            "XX.XX.X",
+            "XXXXXXX",
+            "...XXX.",
+        },
+        [SortingBoardPattern.MidFlower30] = new[]
+        {
+            "..XXX..",
+            ".XXXXX.",
+            "XXXXXXX",
+            ".XXXXX.",
+            "..XXX..",
+            "XXX.XX.",
+            "..XX...",
+        },
+        [SortingBoardPattern.MidShield33] = new[]
+        {
+            "XXXXXXX",
+            "XXXXXXX",
+            ".XXXXX.",
+            ".XXXXX.",
+            "..XXX..",
+            "..XXX..",
+            "...XXX.",
+        },
+        [SortingBoardPattern.MidCrown30] = new[]
+        {
+            "X..X..X",
+            "XXXXXXX",
+            "XXXXXXX",
+            ".XXXXX.",
+            ".XXXXX.",
+            "..XXX..",
+        },
+        [SortingBoardPattern.MidStairs30] = new[]
+        {
+            "XXX......",
+            "XXX......",
+            "XXXXXX...",
+            "XXXXXX...",
+            "...XXXXXX",
+            "......XXX",
+            "......XXX",
+        },
+        [SortingBoardPattern.MidSnake30] = new[]
+        {
+            "XXXXXXXX",
+            "XX......",
+            "XXXXXXXX",
+            "......XX",
+            "XXXXXXXX",
+            "XX......",
+        },
+        [SortingBoardPattern.MidGate30] = new[]
+        {
+            "XXXXXXXX",
+            "XXX..XXX",
+            "XX....XX",
+            "XX....XX",
+            "XX....XX",
+            ".XXXX...",
+        },
+        [SortingBoardPattern.MidBolt30] = new[]
+        {
+            "...XXXXX",
+            "..XXXXX.",
+            ".XXXXX..",
+            "...XXXX.",
+            "..XXXX..",
+            ".XXXX...",
+            "XXX.....",
+        },
+        [SortingBoardPattern.MidCup30] = new[]
+        {
+            "XX....XX",
+            "XX....XX",
+            "XX....XX",
+            "XXXXXXXX",
+            ".XXXXXX.",
+            "..XXXX..",
+        },
+        [SortingBoardPattern.MidLeaf30] = new[]
+        {
+            "....XXX.",
+            "..XXXXX.",
+            ".XXXXXX.",
+            "XXXXXX..",
+            ".XXXXX..",
+            "XXX.....",
+            "XX......",
+        },
         [SortingBoardPattern.LayerLine3] = new[]
         {
             "XXX",
@@ -1225,6 +1585,10 @@ public static class SortingBoardPatterns
         });
 
         int take = NormalizeNestedCount(Mathf.Clamp(targetCount, 1, cells.Count));
+        if (take <= 0)
+        {
+            return string.Empty;
+        }
 
         int width = Mathf.Max(1, sourceCols - 1);
         int height = Mathf.Max(1, sourceRows - 1);
@@ -1252,9 +1616,14 @@ public static class SortingBoardPatterns
 
     private static int NormalizeNestedCount(int count)
     {
-        if (count <= 3)
+        if (count < 3)
         {
-            return Mathf.Max(1, count);
+            return 0;
+        }
+
+        if (count == 3)
+        {
+            return 3;
         }
 
         int normalized = count - count % 3;

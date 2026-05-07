@@ -125,8 +125,8 @@ public static class SortingProjectBootstrap
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, bundleIdTripleMatchKing);
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.iOS, bundleIdTripleMatchKing);
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-        PlayerSettings.bundleVersion = "0.0.2";
-        PlayerSettings.Android.bundleVersionCode = 2;
+        PlayerSettings.bundleVersion = "0.0.3";
+        PlayerSettings.Android.bundleVersionCode = 3;
         PlayerSettings.Android.minifyDebug = false;
         PlayerSettings.Android.minifyRelease = true;
         EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
