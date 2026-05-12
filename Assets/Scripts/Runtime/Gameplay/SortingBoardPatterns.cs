@@ -178,6 +178,18 @@ public enum SortingBoardPattern
     GeoFort48 = 179,
     GeoGalaxy48 = 180,
     GeoLabyrinth48 = 181,
+    SmallHeart18 = 182,
+    Heart24 = 183,
+    HeartWide36 = 184,
+    PrettyGem24 = 185,
+    PrettyFlower24 = 186,
+    PrettyRibbon30 = 187,
+    PrettyBow30 = 188,
+    PrettyShell36 = 189,
+    PrettyClover30 = 190,
+    PrettyLotus36 = 191,
+    PrettyCrown33 = 192,
+    PrettyMask42 = 193,
 }
 
 public static class SortingBoardPatterns
@@ -1658,6 +1670,123 @@ public static class SortingBoardPatterns
             "XXXXXXXXX",
             "XXXXXXXXX",
             "XXXX.XXXX",
+        },
+        [SortingBoardPattern.SmallHeart18] = new[]
+        {
+            ".X.X.",
+            "XXXXX",
+            "XXXXX",
+            ".XXX.",
+            ".XXX.",
+        },
+        [SortingBoardPattern.Heart24] = new[]
+        {
+            ".XX.XX.",
+            ".XXXXX.",
+            "XXXXXXX",
+            ".XXXXX.",
+            "..XXX..",
+        },
+        [SortingBoardPattern.HeartWide36] = new[]
+        {
+            "..XX..XX..",
+            ".XXXXXXXX.",
+            "XXXXXXXXXX",
+            ".XXXXXXXX.",
+            "..XXXX..",
+            "...XX...",
+        },
+        [SortingBoardPattern.PrettyGem24] = new[]
+        {
+            "..XX..",
+            ".XXXX.",
+            "XXXXXX",
+            "XXXXXX",
+            ".XXXX.",
+            "..XX..",
+        },
+        [SortingBoardPattern.PrettyFlower24] = new[]
+        {
+            "..XX..",
+            ".XXXX.",
+            "XXXXXX",
+            ".XXXX.",
+            "..XX..",
+            "X.XX.X",
+            "..XX..",
+        },
+        [SortingBoardPattern.PrettyRibbon30] = new[]
+        {
+            "XX...XX",
+            ".XX.XX.",
+            "..XXX..",
+            ".XXXXX.",
+            "XXXXXXX",
+            "..XXX..",
+            ".XX.XX.",
+        },
+        [SortingBoardPattern.PrettyBow30] = new[]
+        {
+            "XX..XX",
+            "XXXXXX",
+            ".XXXX.",
+            "..XX..",
+            ".XXXX.",
+            "XXXXXX",
+            "XX..XX",
+        },
+        [SortingBoardPattern.PrettyShell36] = new[]
+        {
+            "...X...",
+            "..XXX..",
+            ".XXXXX.",
+            "XXXXXXX",
+            "XX.XXXX",
+            "XXXX.XX",
+            ".XXXXX.",
+            "..XXX..",
+        },
+        [SortingBoardPattern.PrettyClover30] = new[]
+        {
+            ".XX.XX.",
+            "XXXXXXX",
+            ".XX.XX.",
+            "..XXX..",
+            ".XX.XX.",
+            "XXXXXXX",
+            "...X...",
+        },
+        [SortingBoardPattern.PrettyLotus36] = new[]
+        {
+            "...X...",
+            "..XXX..",
+            ".XXXXX.",
+            "XX.X.XX",
+            "XXXXXXX",
+            ".XXXXX.",
+            "X.XXX.X",
+            "..XXX..",
+            "...XX..",
+        },
+        [SortingBoardPattern.PrettyCrown33] = new[]
+        {
+            "...X...",
+            "X..X..X",
+            "XX.XX.X",
+            ".XXXXX.",
+            "XXXXXXX",
+            ".XXXXX.",
+            "XXXXXXX",
+        },
+        [SortingBoardPattern.PrettyMask42] = new[]
+        {
+            "XXXXXXX",
+            "XXXXXXX",
+            "XX.X.XX",
+            ".XXXXX.",
+            ".XXXXX.",
+            "XX.X.XX",
+            "XXXXXX.",
         },
         [SortingBoardPattern.LayerLine3] = new[]
         {

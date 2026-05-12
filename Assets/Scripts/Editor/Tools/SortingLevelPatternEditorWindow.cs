@@ -10,6 +10,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
 {
     private const string CsvAssetPath = "Assets/Resources/Levels/levels.csv";
     private const int MaxGridSize = 13;
+    private const int MaxLayerCount = 5;
     private const float NestedLayerFillRatio = 0.72f;
 
     private int level = 1;
@@ -70,10 +71,12 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         using (new EditorGUILayout.HorizontalScope())
         {
             EditorGUILayout.LabelField("Layers", EditorStyles.boldLabel);
+            EditorGUI.BeginDisabledGroup(layers.Count >= MaxLayerCount);
             if (GUILayout.Button("+ Layer", GUILayout.Width(90)))
             {
                 layers.Add(new EditableLayer { useCustom = true, offset = new Vector2(0.5f, 0.5f) });
             }
+            EditorGUI.EndDisabledGroup();
         }
 
         scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.MinHeight(260), GUILayout.MaxHeight(430));
@@ -268,7 +271,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
             List<Vector2> layerCells = GetLayerPreviewCells(layer);
             Vector2 offset = i == 0
                 ? layer.offset
-                : CalculatePreviewDiagonalOffset(GetLayerSize(layers[i - 1]), GetLayerSize(layer));
+                : GetPreviewUpperLayerOffset(layer);
 
             for (int c = 0; c < layerCells.Count; c++)
             {
@@ -370,16 +373,15 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         return new Vector2Int(rows.Max(r => r.Length), rows.Length);
     }
 
-    private Vector2 CalculatePreviewDiagonalOffset(Vector2Int baseSize, Vector2Int layerSize)
+    private Vector2 GetPreviewUpperLayerOffset(EditableLayer layer)
     {
-        if (baseSize.x <= 0 || baseSize.y <= 0 || layerSize.x <= 0 || layerSize.y <= 0)
+        Vector2 offset = layer != null ? layer.offset : Vector2.zero;
+        if (Mathf.Abs(offset.x) < 0.001f && Mathf.Abs(offset.y) < 0.001f)
         {
-            return new Vector2(0.5f, 0.5f);
+            offset = new Vector2(0.5f, 0.5f);
         }
 
-        float x = (baseSize.x % 2 == layerSize.x % 2) ? 0.5f : 0f;
-        float y = (baseSize.y % 2 == layerSize.y % 2) ? 0.5f : 0f;
-        return new Vector2(x, y);
+        return offset;
     }
 
     private Color PreviewColor(int layer)
@@ -674,7 +676,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
             theme = theme,
             typeCount = Mathf.Clamp(typeCount, 1, 10),
             setsPerType = 1,
-            layerCount = Mathf.Clamp(layers.Count, 1, 3),
+            layerCount = Mathf.Clamp(layers.Count, 1, MaxLayerCount),
             slotCapacity = Mathf.Max(4, slotCapacity),
             allowExtraSlot = level <= 85,
             threeStarSeconds = Mathf.Max(0, threeStarSeconds),

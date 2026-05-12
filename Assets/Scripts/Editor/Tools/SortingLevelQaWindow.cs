@@ -8,6 +8,7 @@ public sealed class SortingLevelQaWindow : EditorWindow
 {
     private const int DefaultLastLevel = 1200;
     private const int MaxIssuesInWindow = 500;
+    private const int MaxLayerCount = 5;
 
     private int firstLevel = 1;
     private int lastLevel = DefaultLastLevel;
@@ -117,9 +118,19 @@ public sealed class SortingLevelQaWindow : EditorWindow
             Add(level, Severity.Error, $"Level 3+ must have upper layers. Layers={layers.Count}");
         }
 
+        if (layers.Count > MaxLayerCount)
+        {
+            Add(level, Severity.Error, $"Too many layers. Layers={layers.Count}, Max={MaxLayerCount}");
+        }
+
         if (definition.typeCount < 1 || definition.typeCount > 10)
         {
             Add(level, Severity.Error, $"typeCount out of range: {definition.typeCount}");
+        }
+
+        if (!IsThemeUnlocked(level, definition.theme))
+        {
+            Add(level, Severity.Error, $"Theme {definition.theme} is locked for this level range.");
         }
 
         if (definition.slotCapacity < 3)
@@ -312,9 +323,7 @@ public sealed class SortingLevelQaWindow : EditorWindow
             List<Vector2> cells = ParseGridCells(grid);
             if (i > 0)
             {
-                Vector2Int previousSize = SortingBoardPatterns.GetGridSize(GetLayerGrid(layers[i - 1]));
-                Vector2Int layerSize = SortingBoardPatterns.GetGridSize(grid);
-                Vector2 offset = CalculateGridOffset(previousSize, layerSize);
+                Vector2 offset = GetUpperLayerOffset(layers[i]);
                 for (int c = 0; c < cells.Count; c++)
                 {
                     cells[c] += offset;
@@ -405,23 +414,80 @@ public sealed class SortingLevelQaWindow : EditorWindow
         return result;
     }
 
-    private static Vector2 CalculateGridOffset(Vector2Int baseSize, Vector2Int layerSize)
+    private static Vector2 GetUpperLayerOffset(SortingBoardLayerDefinition layer)
     {
-        if (baseSize.x <= 0 || baseSize.y <= 0 || layerSize.x <= 0 || layerSize.y <= 0)
+        Vector2 cellOffset = layer != null ? layer.cellOffset : Vector2.zero;
+        if (Mathf.Abs(cellOffset.x) < 0.001f && Mathf.Abs(cellOffset.y) < 0.001f)
         {
-            return new Vector2(0.5f, -0.5f);
+            cellOffset = new Vector2(0.5f, 0.5f);
         }
 
-        float x = NeedsHalfOffset(baseSize.x, layerSize.x) ? 0.5f : 0f;
-        float y = NeedsHalfOffset(baseSize.y, layerSize.y) ? -0.5f : 0f;
-        return new Vector2(x, y);
+        return cellOffset;
     }
 
-    private static bool NeedsHalfOffset(int baseCells, int layerCells)
+    private static bool IsThemeUnlocked(int level, SortingTheme theme)
     {
-        bool baseGridIsOnWholeCells = baseCells % 2 == 1;
-        bool layerGridIsOnWholeCells = layerCells % 2 == 1;
-        return baseGridIsOnWholeCells == layerGridIsOnWholeCells;
+        SortingTheme[] unlockedThemes = GetUnlockedThemes(level);
+        for (int i = 0; i < unlockedThemes.Length; i++)
+        {
+            if (unlockedThemes[i] == theme)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static SortingTheme[] GetUnlockedThemes(int level)
+    {
+        if (level <= 10)
+        {
+            return new[] { SortingTheme.Food };
+        }
+
+        if (level <= 40)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal };
+        }
+
+        if (level <= 80)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet };
+        }
+
+        if (level <= 140)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug };
+        }
+
+        if (level <= 220)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug, SortingTheme.Vehicle };
+        }
+
+        if (level <= 320)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug, SortingTheme.Vehicle, SortingTheme.Weather };
+        }
+
+        if (level <= 500)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug, SortingTheme.Vehicle, SortingTheme.Weather, SortingTheme.Tool };
+        }
+
+        return new[]
+        {
+            SortingTheme.Food,
+            SortingTheme.Plant,
+            SortingTheme.Animal,
+            SortingTheme.Sweet,
+            SortingTheme.Bug,
+            SortingTheme.Vehicle,
+            SortingTheme.Weather,
+            SortingTheme.Tool,
+            SortingTheme.Fantasy,
+        };
     }
 
     private void Add(int level, Severity severity, string message)

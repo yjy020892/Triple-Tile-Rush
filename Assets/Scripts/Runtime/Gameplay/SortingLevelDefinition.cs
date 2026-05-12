@@ -21,7 +21,7 @@ public sealed class SortingLevelDefinition
     [Tooltip("Number of 3-match sets per item type. Total tiles = typeCount * setsPerType * 3.")]
     public int setsPerType = 1;
 
-    [Tooltip("Number of stacked board layers. Recommended range: 1 to 4.")]
+    [Tooltip("Number of stacked board layers. Recommended range: 1 to 5.")]
     public int layerCount = 1;
 
     [Header("Layout")]

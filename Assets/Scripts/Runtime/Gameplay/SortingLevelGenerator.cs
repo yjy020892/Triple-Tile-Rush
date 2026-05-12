@@ -67,71 +67,71 @@ public static class SortingLevelGenerator
         }
         else if (level <= 8)
         {
-            def.typeCount = level <= 5 ? 3 : 4; def.setsPerType = 1; def.layerCount = 2;
+            def.typeCount = 3; def.setsPerType = 1; def.layerCount = 2;
             def.threeStarSeconds = 70 + level * 4; def.twoStarSeconds = 140 + level * 8;
             def.clearCoinReward  = 30 + level;
         }
-        else if (level <= 14)
+        else if (level <= 24)
         {
-            def.typeCount = 4; def.setsPerType = 1; def.layerCount = 2;
+            def.typeCount = level <= 15 ? 3 : 4; def.setsPerType = 1; def.layerCount = 2;
             def.threeStarSeconds = 70; def.twoStarSeconds = 140;
             def.clearCoinReward  = 30;
         }
-        else if (level <= 22)
+        else if (level <= 70)
         {
-            def.typeCount        = level <= 18 ? 5 : 6;
+            def.typeCount        = level <= 45 ? 4 : 5;
             def.setsPerType      = 1;
             def.layerCount       = 2;
             def.threeStarSeconds = 80; def.twoStarSeconds = 160;
             def.clearCoinReward  = 33;
         }
-        else if (level <= 35)
+        else if (level <= 140)
         {
-            def.typeCount        = 6;
-            def.setsPerType      = level <= 28 ? 2 : 3;
-            def.layerCount       = level <= 28 ? 2 : 3;
+            def.typeCount        = level <= 100 ? 5 : 6;
+            def.setsPerType      = level <= 100 ? 2 : 3;
+            def.layerCount       = level <= 90 ? 2 : 3;
             def.threeStarSeconds = 90; def.twoStarSeconds = 175;
             def.clearCoinReward  = 38;
         }
-        else if (level <= 50)
+        else if (level <= 260)
         {
-            def.typeCount        = level <= 43 ? 6 : 7;
+            def.typeCount        = level <= 200 ? 6 : 7;
             def.setsPerType      = 3;
-            def.layerCount       = 3;
+            def.layerCount       = level <= 180 ? 3 : 4;
             def.threeStarSeconds = 100; def.twoStarSeconds = 195;
             def.clearCoinReward  = 45;
         }
-        else if (level <= 70)
+        else if (level <= 420)
         {
-            def.typeCount        = 7;
+            def.typeCount        = level <= 340 ? 7 : 8;
             def.setsPerType      = 3;
-            def.layerCount       = level <= 62 ? 3 : 4;
+            def.layerCount       = level <= 360 ? 4 : 5;
             def.threeStarSeconds = 110; def.twoStarSeconds = 210;
             def.clearCoinReward  = 55;
         }
-        else if (level <= 90)
+        else if (level <= 700)
         {
-            def.typeCount        = level <= 80 ? 7 : 8;
+            def.typeCount        = level <= 560 ? 8 : 9;
             def.setsPerType      = 3;
-            def.layerCount       = 4;
+            def.layerCount       = 5;
             def.threeStarSeconds = 125; def.twoStarSeconds = 240;
             def.clearCoinReward  = 68;
-            def.allowExtraSlot   = level <= 85;
+            def.allowExtraSlot   = level <= 520;
         }
-        else if (level <= 100)
+        else if (level <= 1000)
         {
-            def.typeCount        = 8;
-            def.setsPerType      = level <= 95 ? 3 : 4;
-            def.layerCount       = 4;
+            def.typeCount        = level <= 820 ? 9 : 10;
+            def.setsPerType      = level <= 820 ? 3 : 4;
+            def.layerCount       = 5;
             def.threeStarSeconds = 140; def.twoStarSeconds = 260;
             def.clearCoinReward  = 80;
             def.allowExtraSlot   = false;
         }
         else
         {
-            def.typeCount        = Mathf.Min(10, 8 + (level - 100) / 100);
+            def.typeCount        = 10;
             def.setsPerType      = 4;
-            def.layerCount       = 3;
+            def.layerCount       = 5;
             def.threeStarSeconds = 150; def.twoStarSeconds = 280;
             def.clearCoinReward  = 100 + (level - 100) / 5 * 5;
             def.allowExtraSlot   = false;
@@ -149,22 +149,69 @@ public static class SortingLevelGenerator
 
     private static SortingTheme PickTheme(int level, bool isMilestone)
     {
-        if (level <= 2) return SortingTheme.Food;
+        SortingTheme[] unlockedThemes = GetUnlockedThemes(level);
+        if (unlockedThemes.Length == 0)
+        {
+            return SortingTheme.Food;
+        }
 
-        if (isMilestone && level <= 80) return SortingTheme.Fantasy;
+        if (isMilestone && level > 500)
+        {
+            return SortingTheme.Fantasy;
+        }
 
-        SortingTheme[] rotation =
+        return unlockedThemes[(level - 1) % unlockedThemes.Length];
+    }
+
+    private static SortingTheme[] GetUnlockedThemes(int level)
+    {
+        if (level <= 10)
+        {
+            return new[] { SortingTheme.Food };
+        }
+
+        if (level <= 40)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal };
+        }
+
+        if (level <= 80)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet };
+        }
+
+        if (level <= 140)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug };
+        }
+
+        if (level <= 220)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug, SortingTheme.Vehicle };
+        }
+
+        if (level <= 320)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug, SortingTheme.Vehicle, SortingTheme.Weather };
+        }
+
+        if (level <= 500)
+        {
+            return new[] { SortingTheme.Food, SortingTheme.Plant, SortingTheme.Animal, SortingTheme.Sweet, SortingTheme.Bug, SortingTheme.Vehicle, SortingTheme.Weather, SortingTheme.Tool };
+        }
+
+        return new[]
         {
             SortingTheme.Food,
+            SortingTheme.Plant,
             SortingTheme.Animal,
             SortingTheme.Sweet,
             SortingTheme.Bug,
-            SortingTheme.Plant,
             SortingTheme.Vehicle,
             SortingTheme.Weather,
             SortingTheme.Tool,
+            SortingTheme.Fantasy,
         };
-        return rotation[(level - 3) % rotation.Length];
     }
 
     private static SortingBoardPattern PickPattern(int level, bool isRest, bool isMilestone)
@@ -234,34 +281,50 @@ public static class SortingLevelGenerator
 
         if (ShouldAddSecondLayer(level, isRest, isMilestone))
         {
-            int targetCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
-            string nestedGrid = SortingBoardPatterns.BuildNestedCustomGrid(previousGrid, targetCount, 1);
-            previousGrid = string.IsNullOrWhiteSpace(nestedGrid) ? previousGrid : nestedGrid;
-            previousCount = SortingBoardPatterns.GetGridCellCount(previousGrid);
-            def.layerLayouts.Add(new SortingBoardLayerDefinition
-            {
-                pattern = SortingBoardPattern.Grid,
-                customGrid = previousGrid,
-                cellOffset = new Vector2(0.5f, 0.5f),
-                clipEnvelope = 0.72f
-            });
+            AddGeneratedNestedLayer(def, ref previousGrid, ref previousCount, 1, 0.72f);
         }
 
-        if (ShouldAddThirdLayer(level, isRest, isMilestone))
+        if ((def.layerCount >= 3 || ShouldAddThirdLayer(level, isRest, isMilestone)) && def.layerLayouts.Count >= 2)
         {
-            int targetCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
-            string nestedGrid = SortingBoardPatterns.BuildNestedCustomGrid(previousGrid, targetCount, 2);
-            previousGrid = string.IsNullOrWhiteSpace(nestedGrid) ? previousGrid : nestedGrid;
-            def.layerLayouts.Add(new SortingBoardLayerDefinition
-            {
-                pattern = SortingBoardPattern.Grid,
-                customGrid = previousGrid,
-                cellOffset = new Vector2(0.5f, 0.5f),
-                clipEnvelope = 0.52f
-            });
+            AddGeneratedNestedLayer(def, ref previousGrid, ref previousCount, 2, 0.56f);
         }
 
-        def.layerCount = Mathf.Clamp(def.layerLayouts.Count, 1, 3);
+        if ((def.layerCount >= 4 || ShouldAddFourthLayer(level, isRest, isMilestone)) && def.layerLayouts.Count >= 3)
+        {
+            AddGeneratedNestedLayer(def, ref previousGrid, ref previousCount, 3, 0.48f);
+        }
+
+        if ((def.layerCount >= 5 || ShouldAddFifthLayer(level, isRest, isMilestone)) && def.layerLayouts.Count >= 4)
+        {
+            AddGeneratedNestedLayer(def, ref previousGrid, ref previousCount, 4, 0.42f);
+        }
+
+        def.layerCount = Mathf.Clamp(def.layerLayouts.Count, 1, 5);
+    }
+
+    private static void AddGeneratedNestedLayer(
+        SortingLevelDefinition def,
+        ref string previousGrid,
+        ref int previousCount,
+        int variant,
+        float clipEnvelope)
+    {
+        int targetCount = Mathf.Max(3, Mathf.RoundToInt(previousCount * NestedLayerFillRatio));
+        string nestedGrid = SortingBoardPatterns.BuildNestedCustomGrid(previousGrid, targetCount, variant);
+        if (string.IsNullOrWhiteSpace(nestedGrid))
+        {
+            return;
+        }
+
+        previousGrid = nestedGrid;
+        previousCount = SortingBoardPatterns.GetGridCellCount(previousGrid);
+        def.layerLayouts.Add(new SortingBoardLayerDefinition
+        {
+            pattern = SortingBoardPattern.Grid,
+            customGrid = previousGrid,
+            cellOffset = new Vector2(0.5f, 0.5f),
+            clipEnvelope = clipEnvelope
+        });
     }
 
     private static bool ShouldAddSecondLayer(int level, bool isRest, bool isMilestone)
@@ -278,6 +341,22 @@ public static class SortingLevelGenerator
         if (isRest || level < 36) return false;
         if (level <= 55) return level % 5 == 0;
         if (level <= 75) return level % 4 == 0 || isMilestone;
+        return level % 3 == 0 || isMilestone;
+    }
+
+    private static bool ShouldAddFourthLayer(int level, bool isRest, bool isMilestone)
+    {
+        if (isRest || level < 90) return false;
+        if (level <= 160) return level % 5 == 0 || isMilestone;
+        if (level <= 260) return level % 4 == 0 || isMilestone;
+        return level % 3 != 1 || isMilestone;
+    }
+
+    private static bool ShouldAddFifthLayer(int level, bool isRest, bool isMilestone)
+    {
+        if (isRest || level < 220) return false;
+        if (level <= 360) return level % 6 == 0 || isMilestone;
+        if (level <= 520) return level % 4 == 0 || isMilestone;
         return level % 3 == 0 || isMilestone;
     }
 
@@ -311,6 +390,8 @@ public static class SortingLevelGenerator
             SortingBoardPattern.SmallBlock15,      SortingBoardPattern.SmallDiamond21,
             SortingBoardPattern.SmallPyramid21,    SortingBoardPattern.SmallTwoColumns24,
             SortingBoardPattern.SmallArrow15,      SortingBoardPattern.SmallRing24,
+            SortingBoardPattern.SmallHeart18,      SortingBoardPattern.PrettyGem24,
+            SortingBoardPattern.PrettyFlower24,
         };
 
         if (level <= 30) return new[]
@@ -326,6 +407,8 @@ public static class SortingLevelGenerator
             SortingBoardPattern.FourCorners, SortingBoardPattern.ArrowUp,
             SortingBoardPattern.TShape,      SortingBoardPattern.LShape,
             SortingBoardPattern.Hourglass,   SortingBoardPattern.Bowtie,
+            SortingBoardPattern.Heart24,     SortingBoardPattern.PrettyRibbon30,
+            SortingBoardPattern.PrettyBow30, SortingBoardPattern.PrettyClover30,
         };
 
         if (level <= 50) return new[]
@@ -348,6 +431,9 @@ public static class SortingLevelGenerator
             SortingBoardPattern.FourCorners, SortingBoardPattern.ArrowUp,
             SortingBoardPattern.Hourglass,   SortingBoardPattern.Bowtie,
             SortingBoardPattern.TShape,      SortingBoardPattern.LShape,
+            SortingBoardPattern.Heart24,     SortingBoardPattern.HeartWide36,
+            SortingBoardPattern.PrettyShell36, SortingBoardPattern.PrettyLotus36,
+            SortingBoardPattern.PrettyCrown33,
         };
 
         if (level <= 70) return new[]
@@ -371,6 +457,8 @@ public static class SortingLevelGenerator
             SortingBoardPattern.LetterU,     SortingBoardPattern.SShape,
             SortingBoardPattern.FourLeaf,    SortingBoardPattern.Hourglass,
             SortingBoardPattern.Ring,        SortingBoardPattern.EightStar,
+            SortingBoardPattern.HeartWide36, SortingBoardPattern.PrettyShell36,
+            SortingBoardPattern.PrettyLotus36, SortingBoardPattern.PrettyMask42,
         };
 
         return new[]
@@ -407,6 +495,11 @@ public static class SortingLevelGenerator
             SortingBoardPattern.Hourglass,   SortingBoardPattern.Flower,
             SortingBoardPattern.Crown,       SortingBoardPattern.Hexagon,
             SortingBoardPattern.Mountain,    SortingBoardPattern.Arch,
+            SortingBoardPattern.HeartWide36, SortingBoardPattern.PrettyGem24,
+            SortingBoardPattern.PrettyFlower24, SortingBoardPattern.PrettyRibbon30,
+            SortingBoardPattern.PrettyBow30, SortingBoardPattern.PrettyShell36,
+            SortingBoardPattern.PrettyClover30, SortingBoardPattern.PrettyLotus36,
+            SortingBoardPattern.PrettyCrown33, SortingBoardPattern.PrettyMask42,
         };
     }
 }

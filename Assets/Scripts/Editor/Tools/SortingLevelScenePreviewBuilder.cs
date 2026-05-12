@@ -296,9 +296,7 @@ public static class SortingLevelScenePreviewBuilder
             Vector2 offset = layer != null ? layer.cellOffset * cellSize : Vector2.zero;
             if (l > 0)
             {
-                Vector2Int baseSize = layers != null && l - 1 < layers.Count ? GetLayerGridSize(layers[l - 1]) : Vector2Int.zero;
-                Vector2Int layerSize = GetLayerGridSize(layer);
-                offset = CalculateDiagonalLayerOffset(baseSize, layerSize, cellSize);
+                offset = GetUpperLayerOffset(layer, cellSize);
             }
 
             List<Vector2> cells = layer != null && !string.IsNullOrWhiteSpace(layer.customGrid)
@@ -323,23 +321,15 @@ public static class SortingLevelScenePreviewBuilder
             : SortingBoardPatterns.GetPatternGridSize(layer.pattern);
     }
 
-    private static Vector2 CalculateDiagonalLayerOffset(Vector2Int baseSize, Vector2Int layerSize, float cellSize)
+    private static Vector2 GetUpperLayerOffset(SortingBoardLayerDefinition layer, float cellSize)
     {
-        if (baseSize.x <= 0 || baseSize.y <= 0 || layerSize.x <= 0 || layerSize.y <= 0)
+        Vector2 cellOffset = layer != null ? layer.cellOffset : Vector2.zero;
+        if (Mathf.Abs(cellOffset.x) < 0.001f && Mathf.Abs(cellOffset.y) < 0.001f)
         {
-            return new Vector2(cellSize * 0.5f, cellSize * 0.5f);
+            cellOffset = new Vector2(0.5f, 0.5f);
         }
 
-        float x = NeedsHalfOffset(baseSize.x, layerSize.x) ? cellSize * 0.5f : 0f;
-        float y = NeedsHalfOffset(baseSize.y, layerSize.y) ? cellSize * 0.5f : 0f;
-        return new Vector2(x, y);
-    }
-
-    private static bool NeedsHalfOffset(int baseCells, int layerCells)
-    {
-        bool baseGridIsOnWholeCells = baseCells % 2 == 1;
-        bool layerGridIsOnWholeCells = layerCells % 2 == 1;
-        return baseGridIsOnWholeCells == layerGridIsOnWholeCells;
+        return cellOffset * cellSize;
     }
 
     private static float ComputeCellSizeForLayout(int totalCount, List<SortingBoardLayerDefinition> layers, Rect boardRect)

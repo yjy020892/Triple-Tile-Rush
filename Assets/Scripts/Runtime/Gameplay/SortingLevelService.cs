@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using UnityEngine;
 
 public static class SortingLevelService
@@ -157,13 +158,13 @@ public static class SortingLevelService
         }
 
         csvDefinitions = new Dictionary<int, SortingLevelDefinition>();
-        TextAsset csv = Resources.Load<TextAsset>(DesignedLevelCsvPath);
-        if (csv == null || string.IsNullOrWhiteSpace(csv.text))
+        string csvText = LoadDesignedCsvText();
+        if (string.IsNullOrWhiteSpace(csvText))
         {
             return;
         }
 
-        string[] lines = csv.text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] lines = csvText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         for (int i = 0; i < lines.Length; i++)
         {
             string line = lines[i].Trim();
@@ -177,6 +178,20 @@ public static class SortingLevelService
                 csvDefinitions[parsed.levelIndex] = parsed;
             }
         }
+    }
+
+    private static string LoadDesignedCsvText()
+    {
+#if UNITY_EDITOR
+        string editorPath = Path.Combine(Application.dataPath, "Resources", "Levels", "levels.csv");
+        if (File.Exists(editorPath))
+        {
+            return File.ReadAllText(editorPath);
+        }
+#endif
+
+        TextAsset csv = Resources.Load<TextAsset>(DesignedLevelCsvPath);
+        return csv != null ? csv.text : string.Empty;
     }
 
     private static bool TryParseCsvDefinition(string line, out SortingLevelDefinition definition)
@@ -221,7 +236,7 @@ public static class SortingLevelService
         if (definition.layerLayouts.Count > 0)
         {
             definition.boardPattern = definition.layerLayouts[0].pattern;
-            definition.layerCount = Mathf.Clamp(definition.layerLayouts.Count, 1, 3);
+            definition.layerCount = Mathf.Clamp(definition.layerLayouts.Count, 1, 5);
             AutoNestCsvMarkerLayers(definition);
         }
 

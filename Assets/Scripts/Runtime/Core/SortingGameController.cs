@@ -810,11 +810,7 @@ public partial class SortingGameController : MonoBehaviour
             Vector2 offset = layer != null ? layer.cellOffset * cellSize : Vector2.zero;
             if (l > 0)
             {
-                Vector2Int previousSize = layers != null && l - 1 < layers.Count
-                    ? GetLayerGridSize(layers[l - 1])
-                    : Vector2Int.zero;
-                Vector2Int layerSize = GetLayerGridSize(layer);
-                offset = CalculateDiagonalLayerOffset(previousSize, layerSize, cellSize);
+                offset = GetUpperLayerOffset(layer, cellSize);
             }
 
             List<Vector2> cells = layer != null && !string.IsNullOrWhiteSpace(layer.customGrid)
@@ -859,23 +855,15 @@ public partial class SortingGameController : MonoBehaviour
             : SortingBoardPatterns.GetPatternGridSize(layer.pattern);
     }
 
-    private Vector2 CalculateDiagonalLayerOffset(Vector2Int baseSize, Vector2Int layerSize, float cellSize)
+    private Vector2 GetUpperLayerOffset(SortingBoardLayerDefinition layer, float cellSize)
     {
-        if (baseSize.x <= 0 || baseSize.y <= 0 || layerSize.x <= 0 || layerSize.y <= 0)
+        Vector2 cellOffset = layer != null ? layer.cellOffset : Vector2.zero;
+        if (Mathf.Abs(cellOffset.x) < 0.001f && Mathf.Abs(cellOffset.y) < 0.001f)
         {
-            return new Vector2(cellSize * 0.5f, cellSize * 0.5f);
+            cellOffset = new Vector2(0.5f, 0.5f);
         }
 
-        float x = NeedsHalfOffset(baseSize.x, layerSize.x) ? cellSize * 0.5f : 0f;
-        float y = NeedsHalfOffset(baseSize.y, layerSize.y) ? cellSize * 0.5f : 0f;
-        return new Vector2(x, y);
-    }
-
-    private bool NeedsHalfOffset(int baseCells, int layerCells)
-    {
-        bool baseGridIsOnWholeCells = baseCells % 2 == 1;
-        bool layerGridIsOnWholeCells = layerCells % 2 == 1;
-        return baseGridIsOnWholeCells == layerGridIsOnWholeCells;
+        return cellOffset * cellSize;
     }
 
     private float ComputeCellSizeForLayout(int totalCount, List<SortingBoardLayerDefinition> layers, Rect boardRect)
@@ -908,8 +896,8 @@ public partial class SortingGameController : MonoBehaviour
     private int EstimateBaseLayerCount(int totalCount)
     {
         int layerCount = currentDefinition != null && currentDefinition.layerCount > 0
-            ? Mathf.Clamp(currentDefinition.layerCount, 1, 4)
-            : Mathf.Clamp(1 + ((totalCount + 6) / 14), 2, 4);
+            ? Mathf.Clamp(currentDefinition.layerCount, 1, 5)
+            : Mathf.Clamp(1 + ((totalCount + 6) / 14), 2, 5);
 
         float weightSum = 0f;
         for (int l = 0; l < layerCount; l++) weightSum += Mathf.Pow(0.58f, l);
