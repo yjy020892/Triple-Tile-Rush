@@ -13,7 +13,28 @@
           "package_name": "com.gameislife.triplematchking"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "132946506425-900fmedbc63t5mhmof4hhq3bd02ntkrf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gameislife.triplematchking",
+            "certificate_hash": "9542895cd2d2da2dc1f9562905ffe7732ee7aec4"
+          }
+        },
+        {
+          "client_id": "132946506425-a0fp4a44frdokc4dnnubc6u3f4e8deig.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gameislife.triplematchking",
+            "certificate_hash": "016106c0a78821725b858056e8657bd82a196e52"
+          }
+        },
+        {
+          "client_id": "132946506425-fhnurf41p4t6sfj26prkafmp70b8h34f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAlctjK5iBiS9LP60uiRPMcGFlOTyne7nA"
@@ -21,7 +42,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "132946506425-fhnurf41p4t6sfj26prkafmp70b8h34f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

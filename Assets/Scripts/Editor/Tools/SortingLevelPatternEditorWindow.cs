@@ -213,7 +213,7 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
             }
 
             layer.useCustom = true;
-            layer.offset = new Vector2(0.5f, 0.5f);
+            layer.offset = Vector2.zero;
             LoadCustomGrid(layer, nestedGrid);
             sourceGrid = nestedGrid;
             previousCount = SortingBoardPatterns.GetGridCellCount(nestedGrid);
@@ -376,7 +376,8 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
     private Vector2 GetPreviewUpperLayerOffset(EditableLayer layer)
     {
         Vector2 offset = layer != null ? layer.offset : Vector2.zero;
-        if (Mathf.Abs(offset.x) < 0.001f && Mathf.Abs(offset.y) < 0.001f)
+        bool hasCustomGrid = layer != null && layer.useCustom;
+        if (!hasCustomGrid && Mathf.Abs(offset.x) < 0.001f && Mathf.Abs(offset.y) < 0.001f)
         {
             offset = new Vector2(0.5f, 0.5f);
         }
@@ -561,7 +562,9 @@ public sealed class SortingLevelPatternEditorWindow : EditorWindow
         layers[0].offset = Vector2.zero;
         for (int i = 1; i < layers.Count; i++)
         {
-            if (Mathf.Approximately(layers[i].offset.x, 0f) && Mathf.Approximately(layers[i].offset.y, 0f))
+            if (!layers[i].useCustom
+                && Mathf.Approximately(layers[i].offset.x, 0f)
+                && Mathf.Approximately(layers[i].offset.y, 0f))
             {
                 layers[i].offset = new Vector2(0.5f, 0.5f);
             }

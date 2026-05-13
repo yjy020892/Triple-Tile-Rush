@@ -4,6 +4,12 @@ using UnityEngine;
 //
 public static class SortingSdkBootstrapper
 {
+    public static ISortingAuthService CreateAuthService()
+    {
+        Debug.Log("[SDK] Auth = PlayerPrefs");
+        return new SortingPlayerPrefsAuthService();
+    }
+
     public static ISortingAnalyticsService CreateAnalytics()
     {
 #if SORTING_FIREBASE

@@ -12,7 +12,7 @@ public sealed class SortingWallet
 
     public SortingWallet()
     {
-        coin = Mathf.Max(0, PlayerPrefs.GetInt(CoinKey, 0));
+        coin = Mathf.Max(0, PlayerPrefs.GetInt(SortingAuthProfileKeys.Scoped(CoinKey), PlayerPrefs.GetInt(CoinKey, 0)));
     }
 
     public void SetCoin(int value)
@@ -42,7 +42,7 @@ public sealed class SortingWallet
 
     private void Save()
     {
-        PlayerPrefs.SetInt(CoinKey, coin);
+        PlayerPrefs.SetInt(SortingAuthProfileKeys.Scoped(CoinKey), coin);
         PlayerPrefs.Save();
     }
 }

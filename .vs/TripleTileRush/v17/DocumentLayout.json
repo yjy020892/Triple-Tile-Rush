@@ -7,12 +7,12 @@
       "RelativeMoniker": "D:0:0:{BB6BA17C-7CC7-7E25-C718-F24CCD2B21A9}|Assembly-CSharp-Editor.csproj|solutionrelative:assets\\scripts\\editor\\build\\sortingprojectbootstrap.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB6BA17C-7CC7-7E25-C718-F24CCD2B21A9}|Assembly-CSharp-Editor.csproj|C:\\Users\\User\\Desktop\\Unity\\TripleTileRush\\assets\\scripts\\editor\\tools\\sortinglaunchericongenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB6BA17C-7CC7-7E25-C718-F24CCD2B21A9}|Assembly-CSharp-Editor.csproj|solutionrelative:assets\\scripts\\editor\\tools\\sortinglaunchericongenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{ECA4EC4F-48B5-9AA4-6AFF-1DFF9B7D1D69}|Assembly-CSharp.csproj|c:\\users\\user\\desktop\\unity\\tripletilerush\\assets\\scripts\\runtime\\core\\sortinggamecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{ECA4EC4F-48B5-9AA4-6AFF-1DFF9B7D1D69}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\runtime\\core\\sortinggamecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB6BA17C-7CC7-7E25-C718-F24CCD2B21A9}|Assembly-CSharp-Editor.csproj|C:\\Users\\User\\Desktop\\Unity\\TripleTileRush\\assets\\scripts\\editor\\tools\\sortinglaunchericongenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB6BA17C-7CC7-7E25-C718-F24CCD2B21A9}|Assembly-CSharp-Editor.csproj|solutionrelative:assets\\scripts\\editor\\tools\\sortinglaunchericongenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -32,14 +32,14 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\Editor\\Build\\SortingProjectBootstrap.cs",
               "ToolTip": "C:\\Users\\User\\Desktop\\Unity\\TripleTileRush\\Assets\\Scripts\\Editor\\Build\\SortingProjectBootstrap.cs",
               "RelativeToolTip": "Assets\\Scripts\\Editor\\Build\\SortingProjectBootstrap.cs",
-              "ViewState": "AgIAAHAAAAAAAAAAAAAMwIAAAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAAHYAAAAAAAAAAAAMwJEAAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-04T13:56:02.928Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "SortingLauncherIconGenerator.cs",
               "DocumentMoniker": "C:\\Users\\User\\Desktop\\Unity\\TripleTileRush\\Assets\\Scripts\\Editor\\Tools\\SortingLauncherIconGenerator.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Editor\\Tools\\SortingLauncherIconGenerator.cs",
@@ -57,13 +57,13 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "SortingGameController.cs",
               "DocumentMoniker": "C:\\Users\\User\\Desktop\\Unity\\TripleTileRush\\Assets\\Scripts\\Runtime\\Core\\SortingGameController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Runtime\\Core\\SortingGameController.cs",
               "ToolTip": "C:\\Users\\User\\Desktop\\Unity\\TripleTileRush\\Assets\\Scripts\\Runtime\\Core\\SortingGameController.cs",
               "RelativeToolTip": "Assets\\Scripts\\Runtime\\Core\\SortingGameController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAMcAAAAAAAAAAAAYwNEAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-04T04:40:50.109Z",
               "EditorCaption": ""

@@ -322,7 +322,7 @@ public static class SortingLevelGenerator
         {
             pattern = SortingBoardPattern.Grid,
             customGrid = previousGrid,
-            cellOffset = new Vector2(0.5f, 0.5f),
+            cellOffset = Vector2.zero,
             clipEnvelope = clipEnvelope
         });
     }

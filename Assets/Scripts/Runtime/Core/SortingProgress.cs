@@ -8,17 +8,19 @@ public static class SortingProgress
 
     public static int GetStars(int levelIndex)
     {
-        return Mathf.Clamp(PlayerPrefs.GetInt(string.Format(StarsKeyFormat, levelIndex), 0), 0, 3);
+        string key = string.Format(StarsKeyFormat, levelIndex);
+        return Mathf.Clamp(PlayerPrefs.GetInt(SortingAuthProfileKeys.Scoped(key), PlayerPrefs.GetInt(key, 0)), 0, 3);
     }
 
     public static float GetBestTime(int levelIndex)
     {
-        return PlayerPrefs.GetFloat(string.Format(BestTimeKeyFormat, levelIndex), 0f);
+        string key = string.Format(BestTimeKeyFormat, levelIndex);
+        return PlayerPrefs.GetFloat(SortingAuthProfileKeys.Scoped(key), PlayerPrefs.GetFloat(key, 0f));
     }
 
     public static int GetHighestClearedLevel()
     {
-        return Mathf.Max(0, PlayerPrefs.GetInt(HighestKey, 0));
+        return Mathf.Max(0, PlayerPrefs.GetInt(SortingAuthProfileKeys.Scoped(HighestKey), PlayerPrefs.GetInt(HighestKey, 0)));
     }
 
     // returns true if this clear is a new best (first clear or improved time).
@@ -33,17 +35,17 @@ public static class SortingProgress
 
         if (starsImproved)
         {
-            PlayerPrefs.SetInt(string.Format(StarsKeyFormat, levelIndex), Mathf.Clamp(stars, 0, 3));
+            PlayerPrefs.SetInt(SortingAuthProfileKeys.Scoped(string.Format(StarsKeyFormat, levelIndex)), Mathf.Clamp(stars, 0, 3));
         }
         if (timeImproved)
         {
-            PlayerPrefs.SetFloat(string.Format(BestTimeKeyFormat, levelIndex), clearSeconds);
+            PlayerPrefs.SetFloat(SortingAuthProfileKeys.Scoped(string.Format(BestTimeKeyFormat, levelIndex)), clearSeconds);
         }
 
         int highest = GetHighestClearedLevel();
         if (levelIndex > highest)
         {
-            PlayerPrefs.SetInt(HighestKey, levelIndex);
+            PlayerPrefs.SetInt(SortingAuthProfileKeys.Scoped(HighestKey), levelIndex);
         }
 
         if (firstClear || starsImproved || timeImproved)
@@ -79,8 +81,11 @@ public static class SortingProgress
         {
             PlayerPrefs.DeleteKey(string.Format(StarsKeyFormat, i));
             PlayerPrefs.DeleteKey(string.Format(BestTimeKeyFormat, i));
+            PlayerPrefs.DeleteKey(SortingAuthProfileKeys.Scoped(string.Format(StarsKeyFormat, i)));
+            PlayerPrefs.DeleteKey(SortingAuthProfileKeys.Scoped(string.Format(BestTimeKeyFormat, i)));
         }
         PlayerPrefs.DeleteKey(HighestKey);
+        PlayerPrefs.DeleteKey(SortingAuthProfileKeys.Scoped(HighestKey));
         PlayerPrefs.Save();
     }
 }

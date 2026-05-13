@@ -318,12 +318,12 @@ public partial class SortingGameController : MonoBehaviour
 
     private void LoadSave()
     {
-        currentLevel = Mathf.Max(1, PlayerPrefs.GetInt(LevelKey, 1));
+        currentLevel = Mathf.Max(1, PlayerPrefs.GetInt(SortingAuthProfileKeys.Scoped(LevelKey), PlayerPrefs.GetInt(LevelKey, 1)));
     }
 
     private void SaveGame()
     {
-        PlayerPrefs.SetInt(LevelKey, currentLevel);
+        PlayerPrefs.SetInt(SortingAuthProfileKeys.Scoped(LevelKey), currentLevel);
         PlayerPrefs.Save();
     }
 
@@ -858,7 +858,8 @@ public partial class SortingGameController : MonoBehaviour
     private Vector2 GetUpperLayerOffset(SortingBoardLayerDefinition layer, float cellSize)
     {
         Vector2 cellOffset = layer != null ? layer.cellOffset : Vector2.zero;
-        if (Mathf.Abs(cellOffset.x) < 0.001f && Mathf.Abs(cellOffset.y) < 0.001f)
+        bool hasCustomGrid = layer != null && !string.IsNullOrWhiteSpace(layer.customGrid);
+        if (!hasCustomGrid && Mathf.Abs(cellOffset.x) < 0.001f && Mathf.Abs(cellOffset.y) < 0.001f)
         {
             cellOffset = new Vector2(0.5f, 0.5f);
         }

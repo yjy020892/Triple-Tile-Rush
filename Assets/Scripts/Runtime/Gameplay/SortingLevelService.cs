@@ -280,7 +280,7 @@ public static class SortingLevelService
                 {
                     layer.pattern = SortingBoardPattern.Grid;
                     layer.customGrid = nestedGrid;
-                    layer.cellOffset = new Vector2(0.5f, 0.5f);
+                    layer.cellOffset = Vector2.zero;
                     previousCount = SortingBoardPatterns.GetGridCellCount(nestedGrid);
                     sourceGrid = nestedGrid;
                     continue;

@@ -324,7 +324,8 @@ public static class SortingLevelScenePreviewBuilder
     private static Vector2 GetUpperLayerOffset(SortingBoardLayerDefinition layer, float cellSize)
     {
         Vector2 cellOffset = layer != null ? layer.cellOffset : Vector2.zero;
-        if (Mathf.Abs(cellOffset.x) < 0.001f && Mathf.Abs(cellOffset.y) < 0.001f)
+        bool hasCustomGrid = layer != null && !string.IsNullOrWhiteSpace(layer.customGrid);
+        if (!hasCustomGrid && Mathf.Abs(cellOffset.x) < 0.001f && Mathf.Abs(cellOffset.y) < 0.001f)
         {
             cellOffset = new Vector2(0.5f, 0.5f);
         }

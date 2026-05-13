@@ -2185,7 +2185,7 @@ public static class SortingBoardPatterns
     private static string BuildFallbackNestedGrid(string[] rows, int targetCount)
     {
         int sourceRows = rows != null ? rows.Length : 0;
-        if (sourceRows <= 0)
+        if (sourceRows <= 1)
         {
             return string.Empty;
         }
@@ -2196,7 +2196,7 @@ public static class SortingBoardPatterns
             if (rows[r].Length > sourceCols) sourceCols = rows[r].Length;
         }
 
-        if (sourceCols <= 0)
+        if (sourceCols <= 1)
         {
             return string.Empty;
         }
@@ -2204,30 +2204,31 @@ public static class SortingBoardPatterns
         float sourceCenterX = (sourceCols - 1) * 0.5f;
         float sourceCenterY = (sourceRows - 1) * 0.5f;
         var cells = new List<(int x, int y, float dist)>();
-        for (int r = 0; r < sourceRows; r++)
+        for (int r = 0; r < sourceRows - 1; r++)
         {
-            for (int c = 0; c < rows[r].Length; c++)
+            for (int c = 0; c < sourceCols - 1; c++)
             {
-                if (rows[r][c] != 'X')
+                int support = 0;
+                if (HasCell(rows, c, r)) support++;
+                if (HasCell(rows, c + 1, r)) support++;
+                if (HasCell(rows, c, r + 1)) support++;
+                if (HasCell(rows, c + 1, r + 1)) support++;
+                if (support <= 0)
                 {
                     continue;
                 }
 
-                float dx = c - sourceCenterX;
-                float dy = r - sourceCenterY;
-                cells.Add((c, r, dx * dx + dy * dy));
+                float x = c + 0.5f;
+                float y = r + 0.5f;
+                float dx = x - sourceCenterX;
+                float dy = y - sourceCenterY;
+                cells.Add((c, r, dx * dx + dy * dy + (4 - support) * 2.1f));
             }
         }
 
         if (cells.Count < 3)
         {
             return string.Empty;
-        }
-
-        int sourceCount = cells.Count;
-        if (sourceCols <= 2 || sourceRows <= 2)
-        {
-            targetCount = Mathf.Min(targetCount, NormalizeNestedCount(Mathf.Max(3, sourceCount / 2)));
         }
 
         cells.Sort((a, b) =>
@@ -2245,10 +2246,12 @@ public static class SortingBoardPatterns
             return string.Empty;
         }
 
-        char[][] output = new char[sourceRows][];
-        for (int r = 0; r < sourceRows; r++)
+        int outputRows = sourceRows - 1;
+        int outputCols = sourceCols - 1;
+        char[][] output = new char[outputRows][];
+        for (int r = 0; r < outputRows; r++)
         {
-            output[r] = new string('.', sourceCols).ToCharArray();
+            output[r] = new string('.', outputCols).ToCharArray();
         }
 
         for (int i = 0; i < take; i++)
@@ -2256,8 +2259,8 @@ public static class SortingBoardPatterns
             output[cells[i].y][cells[i].x] = 'X';
         }
 
-        var packed = new List<string>(sourceRows);
-        for (int r = 0; r < sourceRows; r++)
+        var packed = new List<string>(outputRows);
+        for (int r = 0; r < outputRows; r++)
         {
             packed.Add(new string(output[r]));
         }
