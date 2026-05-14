@@ -8,12 +8,16 @@ public static class SortingSdkDefineMenu
 {
     private const string DefineAdMob    = "SORTING_ADMOB";
     private const string DefineFirebase = "SORTING_FIREBASE";
+    private const string DefinePlayUpdate = "SORTING_PLAY_APP_UPDATE";
 
     [MenuItem("Tools/Sorting/Define Symbols/Toggle SORTING_ADMOB")]
     public static void ToggleAdMob() => Toggle(DefineAdMob);
 
     [MenuItem("Tools/Sorting/Define Symbols/Toggle SORTING_FIREBASE")]
     public static void ToggleFirebase() => Toggle(DefineFirebase);
+
+    [MenuItem("Tools/Sorting/Define Symbols/Toggle SORTING_PLAY_APP_UPDATE")]
+    public static void TogglePlayUpdate() => Toggle(DefinePlayUpdate);
 
     [MenuItem("Tools/Sorting/Define Symbols/Show Current")]
     public static void ShowCurrent()

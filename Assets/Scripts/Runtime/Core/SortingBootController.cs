@@ -11,11 +11,14 @@ public sealed class SortingBootController : MonoBehaviour
     private const string MainSceneName = "Main";
 
     private ISortingAuthService authService;
+    private ISortingUpdateService updateService;
     private CanvasGroup choiceGroup;
     private TMP_Text statusText;
     private Button googleButton;
     private Button guestButton;
+    private GameObject eventSystemObject;
     private bool isBusy;
+    private bool isUpdateBlocked;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InstallIfBootScene()
@@ -37,11 +40,18 @@ public sealed class SortingBootController : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
         authService = SortingSdkBootstrapper.CreateAuthService();
+        updateService = SortingSdkBootstrapper.CreateUpdateService();
         BuildUi();
     }
 
     private IEnumerator Start()
     {
+        yield return RunUpdateCheck();
+        if (isUpdateBlocked)
+        {
+            yield break;
+        }
+
         SetBusy(true, "Loading...");
         bool initialized = false;
         string initError = string.Empty;
@@ -65,6 +75,26 @@ public sealed class SortingBootController : MonoBehaviour
         SetBusy(false, status);
     }
 
+    private IEnumerator RunUpdateCheck()
+    {
+        isUpdateBlocked = false;
+        SetBusy(true, "Checking for updates...");
+        if (updateService == null)
+        {
+            yield break;
+        }
+
+        SortingUpdateCheckResult result = null;
+        yield return updateService.CheckForUpdate(updateResult => result = updateResult);
+        if (result == null || result.CanContinue)
+        {
+            yield break;
+        }
+
+        isUpdateBlocked = true;
+        SetBusy(false, string.IsNullOrEmpty(result.Message) ? "Update is required to continue." : result.Message);
+    }
+
     private void BuildUi()
     {
         GameObject canvasObject = new GameObject("BootCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -80,7 +110,8 @@ public sealed class SortingBootController : MonoBehaviour
 
         if (FindObjectOfType<EventSystem>() == null)
         {
-            new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule)).transform.SetParent(transform, false);
+            eventSystemObject = new GameObject("BootEventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+            eventSystemObject.transform.SetParent(transform, false);
         }
 
         GameObject background = CreateRect(canvasObject.transform, "Background", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
@@ -117,6 +148,12 @@ public sealed class SortingBootController : MonoBehaviour
             return;
         }
 
+        if (isUpdateBlocked)
+        {
+            StartCoroutine(RetryUpdateCheck());
+            return;
+        }
+
         SetBusy(true, "Signing in with Google...");
         authService.SignInGoogle((session, error) =>
         {
@@ -137,6 +174,12 @@ public sealed class SortingBootController : MonoBehaviour
             return;
         }
 
+        if (isUpdateBlocked)
+        {
+            StartCoroutine(RetryUpdateCheck());
+            return;
+        }
+
         SetBusy(true, "Starting as guest...");
         authService.SignInGuest((session, error) =>
         {
@@ -150,9 +193,24 @@ public sealed class SortingBootController : MonoBehaviour
         });
     }
 
+    private IEnumerator RetryUpdateCheck()
+    {
+        yield return RunUpdateCheck();
+        if (!isUpdateBlocked)
+        {
+            SetBusy(false, authService.HasCachedSession ? "Choose account to continue." : "Choose how to start.");
+        }
+    }
+
     private IEnumerator LoadMainScene()
     {
         SetBusy(true, "Loading game...");
+        if (eventSystemObject != null)
+        {
+            Destroy(eventSystemObject);
+            eventSystemObject = null;
+        }
+
         AsyncOperation operation = SceneManager.LoadSceneAsync(MainSceneName, LoadSceneMode.Single);
         while (operation != null && !operation.isDone)
         {
@@ -175,6 +233,25 @@ public sealed class SortingBootController : MonoBehaviour
         if (googleButton != null) googleButton.interactable = !busy;
         if (guestButton != null) guestButton.interactable = !busy;
         if (statusText != null) statusText.text = message;
+
+        if (!busy && isUpdateBlocked)
+        {
+            if (googleButton != null)
+            {
+                googleButton.interactable = true;
+                SetButtonLabel(googleButton, "Update");
+            }
+
+            if (guestButton != null)
+            {
+                guestButton.interactable = false;
+            }
+        }
+        else
+        {
+            if (googleButton != null) SetButtonLabel(googleButton, "Continue with Google");
+            if (guestButton != null) SetButtonLabel(guestButton, "Play as Guest");
+        }
     }
 
     private static GameObject CreateRect(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
@@ -219,5 +296,14 @@ public sealed class SortingBootController : MonoBehaviour
         TMP_Text label = CreateText(obj.transform, "Label", text, 32f, FontStyles.Bold, Vector2.zero, Vector2.one);
         label.color = foreground;
         return button;
+    }
+
+    private static void SetButtonLabel(Button button, string text)
+    {
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>();
+        if (label != null)
+        {
+            label.text = text;
+        }
     }
 }

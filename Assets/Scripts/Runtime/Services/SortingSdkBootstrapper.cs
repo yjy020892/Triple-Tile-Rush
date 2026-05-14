@@ -10,6 +10,16 @@ public static class SortingSdkBootstrapper
         return new SortingPlayerPrefsAuthService();
     }
 
+    public static ISortingUpdateService CreateUpdateService()
+    {
+#if SORTING_PLAY_APP_UPDATE
+        Debug.Log("[SDK] Updates = Google Play");
+#else
+        Debug.Log("[SDK] Updates = Disabled");
+#endif
+        return new SortingPlayUpdateService();
+    }
+
     public static ISortingAnalyticsService CreateAnalytics()
     {
 #if SORTING_FIREBASE
