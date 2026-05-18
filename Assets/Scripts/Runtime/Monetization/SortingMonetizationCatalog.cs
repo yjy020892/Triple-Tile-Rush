@@ -4,6 +4,9 @@ public static class SortingAdPlacements
 {
     public const string RewardedHint            = "rw_hint";
     public const string RewardedExtraSlot       = "rw_extra_slot";
+    public const string RewardedShuffle         = "rw_shuffle";
+    public const string RewardedUndo            = "rw_undo";
+    public const string RewardedErase           = "rw_erase";
     public const string RewardedContinue        = "rw_continue";
     public const string RewardedDoubleCoin      = "rw_double_coin";
     public const string InterstitialLevelEnd    = "is_level_end";

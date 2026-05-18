@@ -1,6 +1,7 @@
 #if SORTING_ADMOB
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using GoogleMobileAds.Api;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ using UnityEngine;
 public sealed class SortingAdMobAdService : ISortingAdService
 {
     private readonly SortingAdFrequencyPolicy frequency;
+    private readonly SynchronizationContext unityContext;
     private RewardedAd rewardedAd;
     private InterstitialAd interstitialAd;
     private bool rewardedLoading;
@@ -19,11 +21,15 @@ public sealed class SortingAdMobAdService : ISortingAdService
     public SortingAdMobAdService(SortingAdFrequencyPolicy frequency)
     {
         this.frequency = frequency ?? new SortingAdFrequencyPolicy();
+        unityContext = SynchronizationContext.Current;
         MobileAds.Initialize(status =>
         {
-            sdkInitialized = true;
-            LoadRewarded();
-            LoadInterstitial();
+            RunOnUnityThread(() =>
+            {
+                sdkInitialized = true;
+                LoadRewarded();
+                LoadInterstitial();
+            });
         });
     }
 
@@ -36,26 +42,36 @@ public sealed class SortingAdMobAdService : ISortingAdService
         AdRequest request = new AdRequest();
         RewardedAd.Load(SortingAdMobIds.RewardedUnitId, request, (ad, error) =>
         {
-            rewardedLoading = false;
-            if (error != null || ad == null)
+            RunOnUnityThread(() =>
             {
-                Debug.LogWarning($"[AdMob] Rewarded load failed: {error?.GetMessage()}");
-                return;
-            }
-            rewardedAd = ad;
-            rewardedAd.OnAdFullScreenContentClosed += () =>
-            {
-                rewardedAd?.Destroy();
-                rewardedAd = null;
-                LoadRewarded();
-            };
-            rewardedAd.OnAdFullScreenContentFailed += err =>
-            {
-                Debug.LogWarning($"[AdMob] Rewarded show failed: {err}");
-                rewardedAd?.Destroy();
-                rewardedAd = null;
-                LoadRewarded();
-            };
+                rewardedLoading = false;
+                if (error != null || ad == null)
+                {
+                    Debug.LogWarning($"[AdMob] Rewarded load failed: {error?.GetMessage()}");
+                    return;
+                }
+
+                rewardedAd = ad;
+                rewardedAd.OnAdFullScreenContentClosed += () =>
+                {
+                    RunOnUnityThread(() =>
+                    {
+                        rewardedAd?.Destroy();
+                        rewardedAd = null;
+                        LoadRewarded();
+                    });
+                };
+                rewardedAd.OnAdFullScreenContentFailed += err =>
+                {
+                    RunOnUnityThread(() =>
+                    {
+                        Debug.LogWarning($"[AdMob] Rewarded show failed: {err}");
+                        rewardedAd?.Destroy();
+                        rewardedAd = null;
+                        LoadRewarded();
+                    });
+                };
+            });
         });
     }
 
@@ -67,11 +83,9 @@ public sealed class SortingAdMobAdService : ISortingAdService
             return false;
         }
 
-        bool rewardGranted = false;
         rewardedAd.Show(reward =>
         {
-            rewardGranted = true;
-            onRewardGranted?.Invoke();
+            RunOnUnityThread(() => onRewardGranted?.Invoke());
         });
         return true;
     }
@@ -91,26 +105,36 @@ public sealed class SortingAdMobAdService : ISortingAdService
         AdRequest request = new AdRequest();
         InterstitialAd.Load(SortingAdMobIds.InterstitialUnitId, request, (ad, error) =>
         {
-            interstitialLoading = false;
-            if (error != null || ad == null)
+            RunOnUnityThread(() =>
             {
-                Debug.LogWarning($"[AdMob] Interstitial load failed: {error?.GetMessage()}");
-                return;
-            }
-            interstitialAd = ad;
-            interstitialAd.OnAdFullScreenContentClosed += () =>
-            {
-                interstitialAd?.Destroy();
-                interstitialAd = null;
-                LoadInterstitial();
-            };
-            interstitialAd.OnAdFullScreenContentFailed += err =>
-            {
-                Debug.LogWarning($"[AdMob] Interstitial show failed: {err}");
-                interstitialAd?.Destroy();
-                interstitialAd = null;
-                LoadInterstitial();
-            };
+                interstitialLoading = false;
+                if (error != null || ad == null)
+                {
+                    Debug.LogWarning($"[AdMob] Interstitial load failed: {error?.GetMessage()}");
+                    return;
+                }
+
+                interstitialAd = ad;
+                interstitialAd.OnAdFullScreenContentClosed += () =>
+                {
+                    RunOnUnityThread(() =>
+                    {
+                        interstitialAd?.Destroy();
+                        interstitialAd = null;
+                        LoadInterstitial();
+                    });
+                };
+                interstitialAd.OnAdFullScreenContentFailed += err =>
+                {
+                    RunOnUnityThread(() =>
+                    {
+                        Debug.LogWarning($"[AdMob] Interstitial show failed: {err}");
+                        interstitialAd?.Destroy();
+                        interstitialAd = null;
+                        LoadInterstitial();
+                    });
+                };
+            });
         });
     }
 
@@ -144,5 +168,17 @@ public sealed class SortingAdMobAdService : ISortingAdService
 
     public void NotifyLevelStarted() => frequency.OnLevelStarted();
     public void NotifyLevelEnded() { }
+
+    private void RunOnUnityThread(Action action)
+    {
+        if (action == null) return;
+        if (unityContext == null || SynchronizationContext.Current == unityContext)
+        {
+            action();
+            return;
+        }
+
+        unityContext.Post(_ => action(), null);
+    }
 }
 #endif

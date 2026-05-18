@@ -40,12 +40,22 @@ public sealed class SortingUpdateCheckResult
 
 public sealed class SortingPlayUpdateService : ISortingUpdateService
 {
+    private const float CheckTimeoutSeconds = 3f;
+    private const float UpdateFlowTimeoutSeconds = 120f;
+
     public IEnumerator CheckForUpdate(System.Action<SortingUpdateCheckResult> onComplete)
     {
 #if SORTING_PLAY_APP_UPDATE && UNITY_ANDROID && !UNITY_EDITOR
         AppUpdateManager appUpdateManager = new AppUpdateManager();
         PlayAsyncOperation<AppUpdateInfo, AppUpdateErrorCode> infoOperation = appUpdateManager.GetAppUpdateInfo();
-        yield return infoOperation;
+        yield return WaitForPlayOperation(infoOperation, CheckTimeoutSeconds);
+
+        if (!infoOperation.IsDone)
+        {
+            Debug.LogWarning("[Update] Check timed out. Continuing startup.");
+            onComplete?.Invoke(SortingUpdateCheckResult.Continue("Update check timed out."));
+            yield break;
+        }
 
         if (!infoOperation.IsSuccessful)
         {
@@ -63,6 +73,7 @@ public sealed class SortingPlayUpdateService : ISortingUpdateService
 
         if (updateInfo.UpdateAvailability == UpdateAvailability.DeveloperTriggeredUpdateInProgress)
         {
+            onComplete?.Invoke(SortingUpdateCheckResult.Block("Update is required to continue."));
             yield return StartImmediateUpdate(appUpdateManager, updateInfo, onComplete);
             yield break;
         }
@@ -76,6 +87,7 @@ public sealed class SortingPlayUpdateService : ISortingUpdateService
         AppUpdateOptions updateOptions = AppUpdateOptions.ImmediateAppUpdateOptions();
         if (updateInfo.IsUpdateTypeAllowed(updateOptions))
         {
+            onComplete?.Invoke(SortingUpdateCheckResult.Block("Update is required to continue."));
             yield return StartImmediateUpdate(appUpdateManager, updateInfo, onComplete);
             yield break;
         }
@@ -83,6 +95,7 @@ public sealed class SortingPlayUpdateService : ISortingUpdateService
         updateOptions = AppUpdateOptions.FlexibleAppUpdateOptions();
         if (updateInfo.IsUpdateTypeAllowed(updateOptions))
         {
+            onComplete?.Invoke(SortingUpdateCheckResult.Block("Update is required to continue."));
             yield return StartFlexibleUpdate(appUpdateManager, updateInfo, onComplete);
             yield break;
         }
@@ -100,7 +113,14 @@ public sealed class SortingPlayUpdateService : ISortingUpdateService
     {
         AppUpdateOptions options = AppUpdateOptions.ImmediateAppUpdateOptions();
         AppUpdateRequest request = appUpdateManager.StartUpdate(updateInfo, options);
-        yield return request;
+        yield return WaitForUpdateRequest(request, UpdateFlowTimeoutSeconds);
+
+        if (!request.IsDone)
+        {
+            Debug.LogWarning("[Update] Immediate update timed out.");
+            onComplete?.Invoke(SortingUpdateCheckResult.Block("Update is required to continue."));
+            yield break;
+        }
 
         if (request.Error != AppUpdateErrorCode.NoError)
         {
@@ -116,7 +136,14 @@ public sealed class SortingPlayUpdateService : ISortingUpdateService
     {
         AppUpdateOptions options = AppUpdateOptions.FlexibleAppUpdateOptions();
         AppUpdateRequest request = appUpdateManager.StartUpdate(updateInfo, options);
-        yield return request;
+        yield return WaitForUpdateRequest(request, UpdateFlowTimeoutSeconds);
+
+        if (!request.IsDone)
+        {
+            Debug.LogWarning("[Update] Flexible update timed out.");
+            onComplete?.Invoke(SortingUpdateCheckResult.Block("Update is required to continue."));
+            yield break;
+        }
 
         if (request.Error != AppUpdateErrorCode.NoError)
         {
@@ -136,6 +163,24 @@ public sealed class SortingPlayUpdateService : ISortingUpdateService
         }
 
         onComplete?.Invoke(SortingUpdateCheckResult.Continue());
+    }
+
+    private static IEnumerator WaitForPlayOperation<T, TError>(PlayAsyncOperation<T, TError> operation, float timeoutSeconds)
+    {
+        float startTime = Time.realtimeSinceStartup;
+        while (operation != null && !operation.IsDone && Time.realtimeSinceStartup - startTime < timeoutSeconds)
+        {
+            yield return null;
+        }
+    }
+
+    private static IEnumerator WaitForUpdateRequest(AppUpdateRequest request, float timeoutSeconds)
+    {
+        float startTime = Time.realtimeSinceStartup;
+        while (request != null && !request.IsDone && Time.realtimeSinceStartup - startTime < timeoutSeconds)
+        {
+            yield return null;
+        }
     }
 #endif
 }

@@ -9,6 +9,9 @@ public sealed class SortingBootController : MonoBehaviour
 {
     private const string BootSceneName = "Boot";
     private const string MainSceneName = "Main";
+    private const float UpdateCheckTimeoutSeconds = 3f;
+    private const float AutoSignInTimeoutSeconds = 8f;
+    private const float GoogleSignInTimeoutSeconds = 18f;
 
     private ISortingAuthService authService;
     private ISortingUpdateService updateService;
@@ -19,6 +22,7 @@ public sealed class SortingBootController : MonoBehaviour
     private GameObject eventSystemObject;
     private bool isBusy;
     private bool isUpdateBlocked;
+    private int googleSignInAttemptId;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void InstallIfBootScene()
@@ -69,6 +73,12 @@ public sealed class SortingBootController : MonoBehaviour
             yield break;
         }
 
+        if (authService.HasCachedSession)
+        {
+            yield return AutoSignInRoutine();
+            yield break;
+        }
+
         string status = authService.HasCachedSession
             ? "Choose account to continue."
             : "Choose how to start.";
@@ -85,7 +95,24 @@ public sealed class SortingBootController : MonoBehaviour
         }
 
         SortingUpdateCheckResult result = null;
-        yield return updateService.CheckForUpdate(updateResult => result = updateResult);
+        Coroutine updateCoroutine = StartCoroutine(updateService.CheckForUpdate(updateResult => result = updateResult));
+        float startTime = Time.realtimeSinceStartup;
+        while (result == null && Time.realtimeSinceStartup - startTime < UpdateCheckTimeoutSeconds)
+        {
+            yield return null;
+        }
+
+        if (result == null)
+        {
+            if (updateCoroutine != null)
+            {
+                StopCoroutine(updateCoroutine);
+            }
+
+            Debug.LogWarning("[Update] Boot update check timed out. Continuing startup.");
+            yield break;
+        }
+
         if (result == null || result.CanContinue)
         {
             yield break;
@@ -154,17 +181,95 @@ public sealed class SortingBootController : MonoBehaviour
             return;
         }
 
-        SetBusy(true, "Signing in with Google...");
-        authService.SignInGoogle((session, error) =>
+        StartCoroutine(SignInGoogleRoutine());
+    }
+
+    private IEnumerator AutoSignInRoutine()
+    {
+        int attemptId = ++googleSignInAttemptId;
+        bool completed = false;
+        SortingAuthSession completedSession = null;
+        string completedError = string.Empty;
+
+        SetBusy(true, "Signing in...");
+        authService.TryAutoSignIn((session, error) =>
         {
-            if (session == null || !session.IsValid)
+            if (attemptId != googleSignInAttemptId)
             {
-                SetBusy(false, string.IsNullOrEmpty(error) ? "Google sign-in failed." : error);
                 return;
             }
 
-            StartCoroutine(LoadMainScene());
+            completed = true;
+            completedSession = session;
+            completedError = error;
         });
+
+        float startTime = Time.realtimeSinceStartup;
+        while (!completed && Time.realtimeSinceStartup - startTime < AutoSignInTimeoutSeconds)
+        {
+            yield return null;
+        }
+
+        if (completedSession != null && completedSession.IsValid)
+        {
+            yield return LoadMainScene();
+            yield break;
+        }
+
+        if (!completed)
+        {
+            googleSignInAttemptId++;
+            Debug.LogWarning("[Auth] Auto sign-in timed out.");
+        }
+        else
+        {
+            Debug.LogWarning("[Auth] Auto sign-in skipped: " + completedError);
+        }
+
+        SetBusy(false, "Choose account to continue.");
+    }
+
+    private IEnumerator SignInGoogleRoutine()
+    {
+        int attemptId = ++googleSignInAttemptId;
+        bool completed = false;
+        SortingAuthSession completedSession = null;
+        string completedError = string.Empty;
+
+        SetBusy(true, "Signing in with Google...");
+        authService.SignInGoogle((session, error) =>
+        {
+            if (attemptId != googleSignInAttemptId)
+            {
+                return;
+            }
+
+            completed = true;
+            completedSession = session;
+            completedError = error;
+        });
+
+        float startTime = Time.realtimeSinceStartup;
+        while (!completed && Time.realtimeSinceStartup - startTime < GoogleSignInTimeoutSeconds)
+        {
+            yield return null;
+        }
+
+        if (!completed)
+        {
+            googleSignInAttemptId++;
+            Debug.LogWarning("[Auth] Google sign-in timed out.");
+            SetBusy(false, "Google sign-in timed out. Please try again.");
+            yield break;
+        }
+
+        if (completedSession == null || !completedSession.IsValid)
+        {
+            SetBusy(false, string.IsNullOrEmpty(completedError) ? "Google sign-in failed." : completedError);
+            yield break;
+        }
+
+        yield return LoadMainScene();
     }
 
     private void OnGuestClicked()

@@ -44,5 +44,6 @@ public sealed class SortingWallet
     {
         PlayerPrefs.SetInt(SortingAuthProfileKeys.Scoped(CoinKey), coin);
         PlayerPrefs.Save();
+        SortingCloudSaveService.SaveLocalSnapshotAsync();
     }
 }

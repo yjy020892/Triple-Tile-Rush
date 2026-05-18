@@ -18,7 +18,6 @@ public static class SortingProjectBootstrap
     private static void EnsureProject()
     {
         EnsureScene();
-        EnsureBuildSettings();
         EnsurePlayerSettings();
     }
 
@@ -109,14 +108,6 @@ public static class SortingProjectBootstrap
         Debug.Log("Sorting Puzzle main scene created.");
     }
 
-    private static void EnsureBuildSettings()
-    {
-        EditorBuildSettings.scenes = new[]
-        {
-            new EditorBuildSettingsScene(MainScenePath, true)
-        };
-    }
-
     private static void EnsurePlayerSettings()
     {
         const string bundleIdTripleMatchKing = "com.gameislife.triplematchking";
@@ -125,10 +116,10 @@ public static class SortingProjectBootstrap
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, bundleIdTripleMatchKing);
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.iOS, bundleIdTripleMatchKing);
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-        PlayerSettings.bundleVersion = "0.0.6";
-        PlayerSettings.Android.bundleVersionCode = 6;
+        PlayerSettings.bundleVersion = "0.0.18";
+        PlayerSettings.Android.bundleVersionCode = 18;
         PlayerSettings.Android.minifyDebug = false;
-        PlayerSettings.Android.minifyRelease = true;
+        PlayerSettings.Android.minifyRelease = false;
         EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
         EditorUserBuildSettings.androidCreateSymbolsZip = true;
         EditorUserBuildSettings.buildAppBundle = true;
@@ -188,7 +179,6 @@ public static class SortingBuildMenu
     [MenuItem("Build/Sorting Puzzle/Build Android AAB")]
     public static void BuildAndroidAab()
     {
-        SortingProjectBootstrap.OpenMainScene();
         string buildDirectory = "Builds/Android/aab";
         Directory.CreateDirectory(buildDirectory);
 
@@ -196,7 +186,7 @@ public static class SortingBuildMenu
         string outputName = GetAndroidBuildFileName("aab");
         BuildPlayerOptions options = new BuildPlayerOptions
         {
-            scenes = new[] { "Assets/Scenes/Main.unity" },
+            scenes = GetEnabledEditorBuildScenePaths(),
             target = BuildTarget.Android,
             locationPathName = Path.Combine(buildDirectory, outputName),
             options = BuildOptions.None
@@ -213,7 +203,6 @@ public static class SortingBuildMenu
     [MenuItem("Build/Sorting Puzzle/Build Android APK")]
     public static void BuildAndroidApk()
     {
-        SortingProjectBootstrap.OpenMainScene();
         string buildDirectory = "Builds/Android/apk";
         Directory.CreateDirectory(buildDirectory);
 
@@ -221,7 +210,7 @@ public static class SortingBuildMenu
         string outputName = GetAndroidBuildFileName("apk");
         BuildPlayerOptions options = new BuildPlayerOptions
         {
-            scenes = new[] { "Assets/Scenes/Main.unity" },
+            scenes = GetEnabledEditorBuildScenePaths(),
             target = BuildTarget.Android,
             locationPathName = Path.Combine(buildDirectory, outputName),
             options = BuildOptions.None
@@ -241,6 +230,20 @@ public static class SortingBuildMenu
         string versionName = SanitizeFileName(PlayerSettings.bundleVersion);
         int versionCode = PlayerSettings.Android.bundleVersionCode;
         return $"{appName}_{versionName}_{versionCode}.{extension.TrimStart('.')}";
+    }
+
+    private static string[] GetEnabledEditorBuildScenePaths()
+    {
+        System.Collections.Generic.List<string> scenes = new System.Collections.Generic.List<string>();
+        foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
+        {
+            if (scene.enabled && !string.IsNullOrEmpty(scene.path))
+            {
+                scenes.Add(scene.path);
+            }
+        }
+
+        return scenes.ToArray();
     }
 
     private static string SanitizeFileName(string value)

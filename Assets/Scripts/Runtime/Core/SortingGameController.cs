@@ -13,7 +13,9 @@ public partial class SortingGameController : MonoBehaviour
     private const string LevelKey = "SortingPuzzle_Level";
 
     private const int DefaultBaseSlotCapacity = 7;
-    private const int ContinueCost = 150;
+    private const int ShuffleCost = 100;
+    private const int UndoCost = 50;
+    private const int EraseCost = 150;
     private const int MaxExtraSlots = 3;
     private const int DefaultMatchReward = 5;
     private const int DefaultClearReward = 20;
@@ -64,6 +66,8 @@ public partial class SortingGameController : MonoBehaviour
     private bool isInputLocked;
     private bool isMatchChecking;
     private int extraSlotCount;
+    private int freeUndoUsesRemaining;
+    private int pendingUndoCoinOverride = -1;
     private float currentTileSize = 140f;
     private SortingLevelDefinition currentDefinition;
     private float levelStartUnscaledTime;
@@ -325,6 +329,7 @@ public partial class SortingGameController : MonoBehaviour
     {
         PlayerPrefs.SetInt(SortingAuthProfileKeys.Scoped(LevelKey), currentLevel);
         PlayerPrefs.Save();
+        SortingCloudSaveService.SaveLocalSnapshotAsync();
     }
 
     private bool TryUseSceneUi()
@@ -461,6 +466,8 @@ public partial class SortingGameController : MonoBehaviour
             SortingAudio.Play(SortingAudio.Sfx.Click);
         });
         BindButton(settingsOverlay != null ? FindButtonUnder(settingsOverlay.transform, "RestoreButton") : null, OnRestorePurchasesClicked);
+        BindButton(settingsOverlay != null ? FindButtonUnder(settingsOverlay.transform, "LogoutButton") : null, OnLogoutClicked);
+        BindButton(settingsOverlay != null ? FindButtonUnder(settingsOverlay.transform, "LinkGoogleButton") : null, OnLinkGoogleClicked);
 
         BindButton(shopOverlay != null ? FindButtonUnder(shopOverlay.transform, "CloseButton") : null, () => HideOverlay(shopOverlay));
         BindButton(shopOverlay != null ? FindButtonUnder(shopOverlay.transform, "RewardedRow") : null, OnWatchRewardedAdClicked);
@@ -576,6 +583,8 @@ public partial class SortingGameController : MonoBehaviour
         isGameEnded = false;
         isInputLocked = false;
         extraSlotCount = 0;
+        freeUndoUsesRemaining = 1;
+        pendingUndoCoinOverride = -1;
         undoSnapshots.Clear();
         HidePopup(clearPopup);
         HidePopup(failPopup);
@@ -1341,15 +1350,16 @@ public partial class SortingGameController : MonoBehaviour
             return;
         }
 
-        if (commerce.TryShowRewarded(SortingAdPlacements.RewardedContinue, GrantContinueReward))
+#if SORTING_ADMOB
+        if (commerce != null && commerce.TryShowRewarded(SortingAdPlacements.RewardedContinue, () => ScheduleRewardedBooster(GrantContinueReward)))
         {
             return;
         }
 
-        if (TrySpendCoins(ContinueCost))
-        {
-            GrantContinueReward();
-        }
+        ShowShopForUnavailableBooster(SortingAdPlacements.RewardedContinue);
+#else
+        ScheduleRewardedBooster(GrantContinueReward);
+#endif
     }
 
     private void GrantContinueReward()
@@ -1380,6 +1390,14 @@ public partial class SortingGameController : MonoBehaviour
             return;
         }
 
+        if (!TryRunCoinOrRewardedBooster(SortingAdPlacements.RewardedShuffle, ShuffleCost, ExecuteShuffle))
+        {
+            return;
+        }
+    }
+
+    private void ExecuteShuffle()
+    {
         PushUndoSnapshot();
         List<BoardTileState> state = CaptureBoardState();
         List<SortingItemType> shuffledTypes = state.Select(x => x.itemType).ToList();
@@ -1401,7 +1419,54 @@ public partial class SortingGameController : MonoBehaviour
             return;
         }
 
+        if (freeUndoUsesRemaining > 0)
+        {
+            freeUndoUsesRemaining--;
+            ExecuteUndo();
+            return;
+        }
+
+        TryRunUndoBooster();
+    }
+
+    private void ExecuteUndo()
+    {
+        int coinOverride = pendingUndoCoinOverride;
+        pendingUndoCoinOverride = -1;
         RestoreSnapshot(undoSnapshots.Pop());
+        if (coinOverride >= 0)
+        {
+            wallet.SetCoin(coinOverride);
+            RefreshTopTexts();
+        }
+    }
+
+    private void TryRunUndoBooster()
+    {
+#if SORTING_ADMOB
+        GameStateSnapshot snapshot = undoSnapshots.Count > 0 ? undoSnapshots.Peek() : null;
+        if (snapshot != null && wallet.Coin >= UndoCost && TrySpendCoins(UndoCost))
+        {
+            pendingUndoCoinOverride = Mathf.Max(0, snapshot.coin - UndoCost);
+            ScheduleRewardedBooster(ExecuteUndo);
+            analyticsService?.LogEvent("booster_coin_used", new Dictionary<string, object>
+            {
+                { "placement", SortingAdPlacements.RewardedUndo },
+                { "cost", UndoCost },
+                { "coin_total", pendingUndoCoinOverride }
+            });
+            return;
+        }
+
+        if (commerce != null && commerce.TryShowRewarded(SortingAdPlacements.RewardedUndo, () => ScheduleRewardedBooster(ExecuteUndo)))
+        {
+            return;
+        }
+
+        ShowShopForUnavailableBooster(SortingAdPlacements.RewardedUndo);
+#else
+        ScheduleRewardedBooster(ExecuteUndo);
+#endif
     }
 
     private void OnEraseClicked()
@@ -1418,34 +1483,106 @@ public partial class SortingGameController : MonoBehaviour
             .ToDictionary(g => g.Key, g => g.Count());
 
         SortingItemType targetType = SortingItemType.None;
-        int bestSlotCount = -1;
-
-        foreach (KeyValuePair<SortingItemType, int> pair in slotByType)
-        {
-            int inBoard = boardByType.TryGetValue(pair.Key, out int b) ? b : 0;
-            if (pair.Value + inBoard >= 3 && pair.Value > bestSlotCount)
+        var completableSlotCandidates = slotByType
+            .Where(pair =>
             {
-                bestSlotCount = pair.Value;
-                targetType = pair.Key;
-            }
+                int inBoard = boardByType.TryGetValue(pair.Key, out int b) ? b : 0;
+                return pair.Value + inBoard >= 3;
+            })
+            .ToList();
+
+        int bestSlotCount = completableSlotCandidates.Count > 0
+            ? completableSlotCandidates.Max(pair => pair.Value)
+            : 0;
+        List<SortingItemType> slotCandidates = completableSlotCandidates
+            .Where(pair => pair.Value == bestSlotCount)
+            .Select(pair => pair.Key)
+            .ToList();
+
+        if (slotCandidates.Count > 0)
+        {
+            targetType = slotCandidates[UnityEngine.Random.Range(0, slotCandidates.Count)];
         }
 
         if (targetType == SortingItemType.None)
         {
-            foreach (KeyValuePair<SortingItemType, int> pair in boardByType)
+            List<SortingItemType> boardCandidates = boardByType
+                .Where(pair => pair.Value >= 3)
+                .Select(pair => pair.Key)
+                .ToList();
+
+            if (boardCandidates.Count > 0)
             {
-                if (pair.Value >= 3)
-                {
-                    targetType = pair.Key;
-                    break;
-                }
+                targetType = boardCandidates[UnityEngine.Random.Range(0, boardCandidates.Count)];
             }
         }
 
         if (targetType == SortingItemType.None) return;
 
-        PushUndoSnapshot();
-        StartCoroutine(CoExecuteErase(targetType));
+        TryRunCoinOrRewardedBooster(SortingAdPlacements.RewardedErase, EraseCost, () =>
+        {
+            PushUndoSnapshot();
+            StartCoroutine(CoExecuteErase(targetType));
+        });
+    }
+
+    private bool TryRunCoinOrRewardedBooster(string placementId, int coinCost, Action onGranted)
+    {
+#if SORTING_ADMOB
+        if (TrySpendCoins(coinCost))
+        {
+            ScheduleRewardedBooster(onGranted);
+            analyticsService?.LogEvent("booster_coin_used", new Dictionary<string, object>
+            {
+                { "placement", placementId },
+                { "cost", coinCost },
+                { "coin_total", wallet.Coin }
+            });
+            return true;
+        }
+
+        if (commerce != null && commerce.TryShowRewarded(placementId, () => ScheduleRewardedBooster(onGranted)))
+        {
+            return true;
+        }
+
+        ShowShopForUnavailableBooster(placementId);
+        return false;
+#else
+        ScheduleRewardedBooster(onGranted);
+        return true;
+#endif
+    }
+
+    private void ShowShopForUnavailableBooster(string placementId)
+    {
+        analyticsService?.LogEvent("booster_unavailable_shop", new Dictionary<string, object>
+        {
+            { "placement", placementId },
+            { "coin_total", wallet.Coin }
+        });
+        ShowOverlay(shopOverlay);
+    }
+
+    private void ScheduleRewardedBooster(Action onGranted)
+    {
+        if (!this || !isActiveAndEnabled)
+        {
+            return;
+        }
+
+        StartCoroutine(CoGrantRewardedBooster(onGranted));
+    }
+
+    private IEnumerator CoGrantRewardedBooster(Action onGranted)
+    {
+        yield return null;
+        if (!isActiveAndEnabled)
+        {
+            yield break;
+        }
+
+        onGranted?.Invoke();
     }
 
     private IEnumerator CoExecuteErase(SortingItemType targetType)
@@ -1460,6 +1597,7 @@ public partial class SortingGameController : MonoBehaviour
         int fromBoard = 3 - slotTargets.Count;
         List<SortingItemView> boardTargets = boardItems
             .Where(x => x != null && !x.IsRemoved && x.ItemType == targetType)
+            .OrderBy(_ => UnityEngine.Random.value)
             .Take(fromBoard)
             .ToList();
 

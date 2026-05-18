@@ -51,6 +51,7 @@ public static class SortingProgress
         if (firstClear || starsImproved || timeImproved)
         {
             PlayerPrefs.Save();
+            SortingCloudSaveService.SaveLocalSnapshotAsync();
         }
 
         return firstClear || starsImproved || timeImproved;
@@ -87,5 +88,6 @@ public static class SortingProgress
         PlayerPrefs.DeleteKey(HighestKey);
         PlayerPrefs.DeleteKey(SortingAuthProfileKeys.Scoped(HighestKey));
         PlayerPrefs.Save();
+        SortingCloudSaveService.SaveLocalSnapshotAsync();
     }
 }

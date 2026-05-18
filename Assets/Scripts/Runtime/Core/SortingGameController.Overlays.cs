@@ -98,6 +98,18 @@ public partial class SortingGameController
         });
     }
 
+    private void OnLogoutClicked()
+    {
+        SortingAudio.Play(SortingAudio.Sfx.Click);
+        SortingAuthActions.SignOutAndRestart();
+    }
+
+    private void OnLinkGoogleClicked()
+    {
+        SortingAudio.Play(SortingAudio.Sfx.Click);
+        SortingAuthActions.LinkGuestToGoogleAndRestart();
+    }
+
     // Settings overlay.
 
     private void OnShopBuyClicked(string sku, TMP_Text priceLabel)
