@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public sealed class SortingBootController : MonoBehaviour
 {
     private const string BootSceneName = "Boot";
-    private const string MainSceneName = "Main";
+    private const string LobbySceneName = "Lobby";
     private const float UpdateCheckTimeoutSeconds = 3f;
     private const float AutoSignInTimeoutSeconds = 8f;
     private const float GoogleSignInTimeoutSeconds = 18f;
@@ -16,6 +16,8 @@ public sealed class SortingBootController : MonoBehaviour
     private ISortingAuthService authService;
     private ISortingUpdateService updateService;
     private CanvasGroup choiceGroup;
+    private CanvasGroup splashGroup;
+    private CanvasGroup loginGroup;
     private TMP_Text statusText;
     private Button googleButton;
     private Button guestButton;
@@ -50,6 +52,7 @@ public sealed class SortingBootController : MonoBehaviour
 
     private IEnumerator Start()
     {
+        yield return PlayLogoIntro();
         yield return RunUpdateCheck();
         if (isUpdateBlocked)
         {
@@ -145,7 +148,23 @@ public sealed class SortingBootController : MonoBehaviour
         Image backgroundImage = background.AddComponent<Image>();
         backgroundImage.color = new Color(0.92f, 0.70f, 0.38f, 1f);
 
+        GameObject splash = CreateRect(canvasObject.transform, "SplashLogoScreen", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        splashGroup = splash.AddComponent<CanvasGroup>();
+        Image splashBackground = splash.AddComponent<Image>();
+        splashBackground.color = Color.black;
+
+        GameObject logoBadge = CreateRect(splash.transform, "GameLogoRoot", new Vector2(0.16f, 0.36f), new Vector2(0.84f, 0.64f), Vector2.zero, Vector2.zero);
+        Image logoBadgeImage = logoBadge.AddComponent<Image>();
+        logoBadgeImage.color = new Color(0.17f, 0.58f, 0.20f, 1f);
+
+        TMP_Text logoText = CreateText(logoBadge.transform, "LogoText", "TRIPLE TILE\nRUSH", 72f, FontStyles.Bold, new Vector2(0.06f, 0.10f), new Vector2(0.94f, 0.90f));
+        logoText.color = new Color(1f, 0.84f, 0.34f, 1f);
+
         GameObject panel = CreateRect(canvasObject.transform, "Panel", new Vector2(0.1f, 0.22f), new Vector2(0.9f, 0.82f), Vector2.zero, Vector2.zero);
+        loginGroup = panel.AddComponent<CanvasGroup>();
+        loginGroup.alpha = 0f;
+        loginGroup.interactable = false;
+        loginGroup.blocksRaycasts = false;
         Image panelImage = panel.AddComponent<Image>();
         panelImage.color = new Color(1f, 0.88f, 0.62f, 0.96f);
 
@@ -212,7 +231,7 @@ public sealed class SortingBootController : MonoBehaviour
 
         if (completedSession != null && completedSession.IsValid)
         {
-            yield return LoadMainScene();
+            yield return LoadLobbyScene();
             yield break;
         }
 
@@ -269,7 +288,7 @@ public sealed class SortingBootController : MonoBehaviour
             yield break;
         }
 
-        yield return LoadMainScene();
+        yield return LoadLobbyScene();
     }
 
     private void OnGuestClicked()
@@ -294,7 +313,7 @@ public sealed class SortingBootController : MonoBehaviour
                 return;
             }
 
-            StartCoroutine(LoadMainScene());
+            StartCoroutine(LoadLobbyScene());
         });
     }
 
@@ -307,16 +326,16 @@ public sealed class SortingBootController : MonoBehaviour
         }
     }
 
-    private IEnumerator LoadMainScene()
+    private IEnumerator LoadLobbyScene()
     {
-        SetBusy(true, "Loading game...");
+        SetBusy(true, "Loading...");
         if (eventSystemObject != null)
         {
             Destroy(eventSystemObject);
             eventSystemObject = null;
         }
 
-        AsyncOperation operation = SceneManager.LoadSceneAsync(MainSceneName, LoadSceneMode.Single);
+        AsyncOperation operation = SceneManager.LoadSceneAsync(LobbySceneName, LoadSceneMode.Single);
         while (operation != null && !operation.isDone)
         {
             yield return null;
@@ -357,6 +376,54 @@ public sealed class SortingBootController : MonoBehaviour
             if (googleButton != null) SetButtonLabel(googleButton, "Continue with Google");
             if (guestButton != null) SetButtonLabel(guestButton, "Play as Guest");
         }
+    }
+
+    private IEnumerator PlayLogoIntro()
+    {
+        if (loginGroup != null)
+        {
+            loginGroup.alpha = 0f;
+            loginGroup.interactable = false;
+            loginGroup.blocksRaycasts = false;
+        }
+
+        if (splashGroup == null)
+        {
+            yield break;
+        }
+
+        splashGroup.gameObject.SetActive(true);
+        splashGroup.alpha = 0f;
+        yield return FadeCanvasGroup(splashGroup, 0f, 1f, 0.45f);
+        yield return new WaitForSecondsRealtime(0.75f);
+        yield return FadeCanvasGroup(splashGroup, 1f, 0f, 0.35f);
+        splashGroup.gameObject.SetActive(false);
+
+        if (loginGroup != null)
+        {
+            loginGroup.gameObject.SetActive(true);
+            yield return FadeCanvasGroup(loginGroup, 0f, 1f, 0.25f);
+            loginGroup.interactable = true;
+            loginGroup.blocksRaycasts = true;
+        }
+    }
+
+    private static IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)
+    {
+        if (group == null)
+        {
+            yield break;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            group.alpha = Mathf.Lerp(from, to, duration <= 0f ? 1f : Mathf.Clamp01(elapsed / duration));
+            yield return null;
+        }
+
+        group.alpha = to;
     }
 
     private static GameObject CreateRect(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)

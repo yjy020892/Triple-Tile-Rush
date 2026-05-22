@@ -42,6 +42,7 @@ public partial class SortingGameController : MonoBehaviour
     private TMP_Text remainText;
     private TMP_Text emptyText;
     private TMP_Text hintInfoText;
+    private Image sceneBackgroundImage;
     private int lastDisplayedCoinForUi = int.MinValue;
     private RectTransform coinChipRect;
     private Vector3 coinChipBaseScale = Vector3.one;
@@ -234,7 +235,7 @@ public partial class SortingGameController : MonoBehaviour
     {
         if (pause)
         {
-            SaveGame();
+            SaveGame(false);
             analyticsService?.LogEvent("app_pause", null);
         }
         else
@@ -249,7 +250,7 @@ public partial class SortingGameController : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        SaveGame();
+        SaveGame(false);
         analyticsService?.LogEvent("app_quit", null);
     }
 
@@ -325,11 +326,14 @@ public partial class SortingGameController : MonoBehaviour
         currentLevel = Mathf.Max(1, PlayerPrefs.GetInt(SortingAuthProfileKeys.Scoped(LevelKey), PlayerPrefs.GetInt(LevelKey, 1)));
     }
 
-    private void SaveGame()
+    private void SaveGame(bool syncCloud = true)
     {
         PlayerPrefs.SetInt(SortingAuthProfileKeys.Scoped(LevelKey), currentLevel);
         PlayerPrefs.Save();
-        SortingCloudSaveService.SaveLocalSnapshotAsync();
+        if (syncCloud)
+        {
+            SortingCloudSaveService.SaveLocalSnapshotAsync();
+        }
     }
 
     private bool TryUseSceneUi()
@@ -358,6 +362,7 @@ public partial class SortingGameController : MonoBehaviour
         remainText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "RemainText");
         emptyText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "EmptyText");
         hintInfoText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "HintText");
+        sceneBackgroundImage = FindNamedComponentInChildren<Image>(rootCanvas.transform, "Background");
 
         clearPopup = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "ClearPopup");
         failPopup = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "FailPopup");
@@ -391,6 +396,7 @@ public partial class SortingGameController : MonoBehaviour
         HideOverlayImmediate(tutorialOverlay);
         if (tutorialArrow != null) tutorialArrow.gameObject.SetActive(false);
         RefreshSoundButtonVisual();
+        ApplySelectedBackground();
         PromoteToSubCanvas(boardRoot);
         PromoteToSubCanvas(slotRoot);
         return true;
@@ -593,6 +599,8 @@ public partial class SortingGameController : MonoBehaviour
         BuildSlotCells();
 
         currentDefinition = SortingLevelService.GetDefinition(currentLevel);
+        currentDefinition.theme = SortingThemeSettings.SelectedTheme;
+        currentDefinition.allowMixedThemes = false;
         SortingItemView.SetLevelTile(currentLevel);
         List<SortingItemType> itemTypes = SortingLevelService.BuildBoardItems(currentDefinition);
         List<BoardTileState> boardStates = BuildStackedBoardStates(itemTypes, currentLevel);
@@ -1595,10 +1603,19 @@ public partial class SortingGameController : MonoBehaviour
             .ToList();
 
         int fromBoard = 3 - slotTargets.Count;
-        List<SortingItemView> boardTargets = boardItems
-            .Where(x => x != null && !x.IsRemoved && x.ItemType == targetType)
+        List<SortingItemView> exposedBoardTargets = boardItems
+            .Where(x => x != null && !x.IsRemoved && x.ItemType == targetType && x.IsExposed)
             .OrderBy(_ => UnityEngine.Random.value)
             .Take(fromBoard)
+            .ToList();
+        int coveredNeeded = fromBoard - exposedBoardTargets.Count;
+        List<SortingItemView> coveredBoardTargets = boardItems
+            .Where(x => x != null && !x.IsRemoved && x.ItemType == targetType && !x.IsExposed)
+            .OrderBy(_ => UnityEngine.Random.value)
+            .Take(coveredNeeded)
+            .ToList();
+        List<SortingItemView> boardTargets = exposedBoardTargets
+            .Concat(coveredBoardTargets)
             .ToList();
 
         foreach (SortingItemView item in slotTargets)
@@ -1728,6 +1745,22 @@ public partial class SortingGameController : MonoBehaviour
         {
             int free = Mathf.Max(0, GetCurrentSlotCapacity() - slotItems.Count);
             emptyText.text = $"Tray  {free} / {GetCurrentSlotCapacity()}  free";
+        }
+    }
+
+    private void ApplySelectedBackground()
+    {
+        if (sceneBackgroundImage == null)
+        {
+            return;
+        }
+
+        string backgroundId = SortingThemeSettings.SelectedBackground;
+        Sprite sprite = Resources.Load<Sprite>("Backgrounds/" + backgroundId);
+        if (sprite != null)
+        {
+            sceneBackgroundImage.sprite = sprite;
+            sceneBackgroundImage.color = Color.white;
         }
     }
 

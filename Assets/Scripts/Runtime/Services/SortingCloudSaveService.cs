@@ -14,6 +14,8 @@ public static class SortingCloudSaveService
     private const string BestTimeKeyFormat = "SortingPuzzle_BestTime_{0}";
     private const string HighestKey = "SortingPuzzle_Highest";
     private const int MaxSyncedLevels = 500;
+    private static bool saveInProgress;
+    private static bool saveAgainRequested;
 
     [Serializable]
     private sealed class SaveData
@@ -46,13 +48,29 @@ public static class SortingCloudSaveService
 
     public static async void SaveLocalSnapshotAsync()
     {
+        if (saveInProgress)
+        {
+            saveAgainRequested = true;
+            return;
+        }
+
+        saveInProgress = true;
         try
         {
-            await SaveCloudAsync(CaptureLocal());
+            do
+            {
+                saveAgainRequested = false;
+                await SaveCloudAsync(CaptureLocal());
+            }
+            while (saveAgainRequested);
         }
         catch (Exception exception)
         {
             Debug.LogWarning("[CloudSave] Save skipped: " + exception.Message);
+        }
+        finally
+        {
+            saveInProgress = false;
         }
     }
 
