@@ -260,7 +260,7 @@ public class SortingItemView : MonoBehaviour, IPointerClickHandler
 
     private static Sprite LoadTileSprite()
     {
-        return Resources.Load<Sprite>($"Tiles/{currentLevelTileSprite}");
+        return SortingAddressableVisualCache.GetTileBack(currentLevelTileSprite);
     }
 
     private static Sprite LoadIconSprite(SortingItemType type)
@@ -274,25 +274,11 @@ public class SortingItemView : MonoBehaviour, IPointerClickHandler
         int iconIndex = SortingItemCatalog.GetThemeIconIndex(type);
         if (iconIndex > 0)
         {
-            string themeName = theme.ToString();
-            string fileName = $"tileicon_{themeName.ToLowerInvariant()}{iconIndex}";
-            Sprite themedIcon = Resources.Load<Sprite>($"TileIcons/{themeName}/{fileName}");
+            Sprite themedIcon = SortingAddressableVisualCache.GetThemeIcon(theme, iconIndex);
             if (themedIcon != null)
             {
                 return themedIcon;
             }
-
-            themedIcon = Resources.Load<Sprite>($"TileIcons/{themeName.ToLowerInvariant()}/{fileName}");
-            if (themedIcon != null)
-            {
-                return themedIcon;
-            }
-        }
-
-        Sprite icon = Resources.Load<Sprite>($"TileIcons/{type}");
-        if (icon != null)
-        {
-            return icon;
         }
 
         return SortingProceduralIconProvider.Get(type);

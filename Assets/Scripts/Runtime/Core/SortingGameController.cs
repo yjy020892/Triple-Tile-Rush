@@ -43,6 +43,7 @@ public partial class SortingGameController : MonoBehaviour
     private TMP_Text emptyText;
     private TMP_Text hintInfoText;
     private Image sceneBackgroundImage;
+    private SortingMainEntryTransition mainEntryTransition;
     private int lastDisplayedCoinForUi = int.MinValue;
     private RectTransform coinChipRect;
     private Vector3 coinChipBaseScale = Vector3.one;
@@ -109,7 +110,7 @@ public partial class SortingGameController : MonoBehaviour
         public int extraSlot;
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
         Application.targetFrameRate = 60;
         Screen.sleepTimeout = SleepTimeout.SystemSetting;
@@ -130,7 +131,7 @@ public partial class SortingGameController : MonoBehaviour
         {
             Debug.LogError("[SortingGameController] Scene UI not found. The baked Canvas under SortingGameController is required.");
             enabled = false;
-            return;
+            yield break;
         }
 
         analyticsService.LogEvent(SortingAnalyticsEvents.SessionStart, new Dictionary<string, object>
@@ -140,7 +141,11 @@ public partial class SortingGameController : MonoBehaviour
             { "ads_removed", commerce.Iap.IsOwned(SortingIapCatalog.SkuRemoveAds) || commerce.Iap.IsOwned(SortingIapCatalog.SkuStarterPack) ? 1 : 0 }
         });
 
+        SortingTheme selectedTheme = SortingThemeSettings.SelectedTheme;
+        yield return SortingAddressableVisualCache.PreloadForLevel(selectedTheme, SortingThemeSettings.SelectedBackground);
+        ApplySelectedBackground();
         StartLevel();
+        mainEntryTransition?.BeginReveal();
     }
 
     private void Update()
@@ -363,6 +368,8 @@ public partial class SortingGameController : MonoBehaviour
         emptyText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "EmptyText");
         hintInfoText = FindNamedComponentInChildren<TMP_Text>(rootCanvas.transform, "HintText");
         sceneBackgroundImage = FindNamedComponentInChildren<Image>(rootCanvas.transform, "Background");
+        mainEntryTransition = FindNamedComponentInChildren<SortingMainEntryTransition>(rootCanvas.transform, "MainEntryCloudTransition");
+        mainEntryTransition?.PrepareCovered();
 
         clearPopup = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "ClearPopup");
         failPopup = FindNamedComponentInChildren<CanvasGroup>(rootCanvas.transform, "FailPopup");
@@ -396,7 +403,6 @@ public partial class SortingGameController : MonoBehaviour
         HideOverlayImmediate(tutorialOverlay);
         if (tutorialArrow != null) tutorialArrow.gameObject.SetActive(false);
         RefreshSoundButtonVisual();
-        ApplySelectedBackground();
         PromoteToSubCanvas(boardRoot);
         PromoteToSubCanvas(slotRoot);
         return true;
@@ -1756,7 +1762,7 @@ public partial class SortingGameController : MonoBehaviour
         }
 
         string backgroundId = SortingThemeSettings.SelectedBackground;
-        Sprite sprite = Resources.Load<Sprite>("Backgrounds/" + backgroundId);
+        Sprite sprite = SortingAddressableVisualCache.GetBackground(backgroundId);
         if (sprite != null)
         {
             sceneBackgroundImage.sprite = sprite;

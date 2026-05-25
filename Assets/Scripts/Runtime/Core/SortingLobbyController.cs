@@ -65,11 +65,12 @@ public sealed class SortingLobbyController : MonoBehaviour
         BindRuntimeButtons();
         RefreshThemeText();
         HideThemeOverlay();
+        PreloadCurrentSelection();
     }
 
     public void StartGame()
     {
-        SceneManager.LoadScene(MainSceneName, LoadSceneMode.Single);
+        StartCoroutine(LoadMainWhenVisualsReady());
     }
 
     public void ShowThemeOverlay()
@@ -104,6 +105,7 @@ public sealed class SortingLobbyController : MonoBehaviour
         {
             SortingThemeSettings.SelectedTheme = theme;
             RefreshSelectionTexts();
+            PreloadCurrentSelection();
         }
     }
 
@@ -111,6 +113,7 @@ public sealed class SortingLobbyController : MonoBehaviour
     {
         SortingThemeSettings.SelectedBackground = backgroundName;
         RefreshSelectionTexts();
+        PreloadCurrentSelection();
     }
 
     public void ShowThemeTab() => ShowCustomizeTab(themeContent);
@@ -179,6 +182,25 @@ public sealed class SortingLobbyController : MonoBehaviour
     private void RefreshThemeText()
     {
         RefreshSelectionTexts();
+    }
+
+    private void PreloadCurrentSelection()
+    {
+        StartCoroutine(SortingAddressableVisualCache.PreloadForLevel(
+            SortingThemeSettings.SelectedTheme,
+            SortingThemeSettings.SelectedBackground));
+    }
+
+    private System.Collections.IEnumerator LoadMainWhenVisualsReady()
+    {
+        SortingTheme theme = SortingThemeSettings.SelectedTheme;
+        string background = SortingThemeSettings.SelectedBackground;
+        if (!SortingAddressableVisualCache.IsLevelReady(theme, background))
+        {
+            yield return SortingAddressableVisualCache.PreloadForLevel(theme, background);
+        }
+
+        SceneManager.LoadScene(MainSceneName, LoadSceneMode.Single);
     }
 
     private void ShowCustomizeTab(CanvasGroup active)

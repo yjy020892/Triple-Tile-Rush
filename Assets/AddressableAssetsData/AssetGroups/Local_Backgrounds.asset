@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Local_Backgrounds
+  m_EditorClassIdentifier: 
+  m_GroupName: Local_Backgrounds
+  m_GUID: 6ba2c4c0bc3ee7f4a97a2820403abfeb
+  m_SerializeEntries:
+  - m_GUID: 392bb4dd20a00cd43bdac1c98293779c
+    m_Address: background/back2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 47509fd29eb1dc64eace3eb14b4b2cf6
+    m_Address: background/back4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4c67b318dada2c44093bfa9bd3db7965
+    m_Address: background/back1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d93dcea42632bf4ea04f31b64d97740
+    m_Address: background/back3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 68497f7b1a364254bb0f4e065538f1d8, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 8259f03dbaf9f4946bfd2bca4d800ca0, type: 2}
+    - {fileID: 11400000, guid: 3543626a03d684d4387735b9289ff706, type: 2}

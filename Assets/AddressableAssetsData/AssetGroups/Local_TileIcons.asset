@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Local_TileIcons
+  m_EditorClassIdentifier: 
+  m_GroupName: Local_TileIcons
+  m_GUID: 8cf413c92569b4d44ac441cff89364a7
+  m_SerializeEntries:
+  - m_GUID: 06da58da8c72888448571b8f3a2446f7
+    m_Address: tileicons/Food
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_food
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0cb3ae23d12b90642be46e9d2a1ef9e7
+    m_Address: tileicons/Sweet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_sweet
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1357470d03ae5cc4dbef90c0d7a22466
+    m_Address: tileicons/plant
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_plant
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c3f82b2faf54f14a88d1b731f8b3df5
+    m_Address: tileicons/Fantasy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_fantasy
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 51dbb31977887fe4988143890e7e1b06
+    m_Address: tileicons/Vehicle
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_vehicle
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 80a3e77af6842b847a67da26c9bd8b0e
+    m_Address: tileicons/Bug
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_bug
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89284a2c1e971184d89cf520dac862c0
+    m_Address: tileicons/Animal
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_animal
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b1cba30d109e2714e893553611b8ca82
+    m_Address: tileicons/Weather
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_weather
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f687b371484d97e41bb8d9ae457ed5d5
+    m_Address: tileicons/Tool
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - theme_tool
+    - tileicon
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 68497f7b1a364254bb0f4e065538f1d8, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 182fc1164c835f74fb36f083e5e3a478, type: 2}
+    - {fileID: 11400000, guid: 4c5ea510b3b58c14ab46698934fb4d67, type: 2}

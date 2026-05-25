@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Local_TileBacks
+  m_EditorClassIdentifier: 
+  m_GroupName: Local_TileBacks
+  m_GUID: 14784c29169f33a4b9b3456e7ba0167c
+  m_SerializeEntries:
+  - m_GUID: a0195555ef7cc6a419016e5eecb44fb9
+    m_Address: tileback/blue
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - tileback
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b6b197717647623468208e5c43647519
+    m_Address: tileback/purple
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - tileback
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4917bad2ac0fce488a3d54205adb96d
+    m_Address: tileback/orange
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - tileback
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 68497f7b1a364254bb0f4e065538f1d8, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 82b1d038bf33b1a44b7682305031fc2f, type: 2}
+    - {fileID: 11400000, guid: 4b70dc984f063474ea7db5a818238656, type: 2}
